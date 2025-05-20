@@ -45,10 +45,10 @@ class ProjectController extends Controller
         return response()->json(new ProjectResource($project), 201);
     }
 
-    public function update(ProjectRequest $request, int $id)
+    public function update(Request $request, int $id)
     {
         try {
-            $project = $this->projectService->update($id, $request->validated());
+            $project = $this->projectService->update($id, $request->all());
             return response()->json(new ProjectResource($project));
         } catch (\Exception $e) {
             return response()->json([

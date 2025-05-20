@@ -8,7 +8,7 @@ class ProjectRepository
 {
     public function getAll(array $fields)
     {
-        return Project::select($fields)->latest()->paginate(10);
+        return Project::select($fields)->get();
     }
 
     public function getById(int $id, array $fields)
