@@ -46,6 +46,7 @@ class DatabaseSeeder extends Seeder
             // InvoiceTypeSeeder::class,
             // AddocTypeSeeder::class,
             RolePermissionSeeder::class,
+            UserSeeder::class, // Add our test user
         ]);
 
         // attach role to user

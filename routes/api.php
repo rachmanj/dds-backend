@@ -6,14 +6,16 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
-Route::post('/register', [AuthController::class, 'register']);
+// Public authentication routes
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/token-login', [AuthController::class, 'tokenLogin']);
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Protected routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    // User info
+    Route::get('/user', [AuthController::class, 'me']);
 
-Route::apiResource('projects', ProjectController::class);
-Route::apiResource('departments', DepartmentController::class);
+    // Resources
+    Route::apiResource('projects', ProjectController::class);
+    Route::apiResource('departments', DepartmentController::class);
+});
