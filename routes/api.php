@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\AdditionalDocumentTypeController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\InvoiceTypeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,3 +21,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('projects', ProjectController::class);
     Route::apiResource('departments', DepartmentController::class);
 });
+Route::apiResource('addoc-types', AdditionalDocumentTypeController::class);
+Route::apiResource('invoice-types', InvoiceTypeController::class);
