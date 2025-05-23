@@ -24,7 +24,7 @@ class AuthRepository
     }
 
     public function login(array $data)
-    {   
+    {
         $credentials = [
             'email' => $data['email'],
             'password' => $data['password']
@@ -36,13 +36,13 @@ class AuthRepository
             ], 401);
         }
 
-       request()->session()->regenerate();
+        request()->session()->regenerate();
 
-       $user = Auth::user();
+        $user = Auth::user();
 
         return response()->json([
             'message' => 'Login successful',
-            'user' => new UserResource($user->load('roles')),
+            'user' => new UserResource($user),
         ], 200);
     }
 
@@ -51,7 +51,7 @@ class AuthRepository
         if (!Auth::attempt([
             'email' => $data['email'],
             'password' => $data['password']
-        ]))  {
+        ])) {
             return response()->json([
                 'message' => 'Invalid credentials'
             ], 401);
@@ -64,8 +64,7 @@ class AuthRepository
         return response()->json([
             'message' => 'Login successful',
             'token' => $token,
-            'user' => new UserResource($user->load('roles')),
+            'user' => new UserResource($user),
         ], 200);
-        
     }
 }

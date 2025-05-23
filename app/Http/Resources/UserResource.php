@@ -22,10 +22,14 @@ class UserResource extends JsonResource
             'email_verified_at' => $this->email_verified_at,
             'nik' => $this->nik,
             'project' => $this->project,
-            'department' => $this->department->name,
-            'is_active' => $this->is_active,
-            'roles' => $this->roles->pluck('name'),
-            'permissions' => $this->getAllPermissions()->pluck('name'),
+            'department' => $this->department ? $this->department->name : null,
+            'is_active' => $this->is_active ?? true,
+            'roles' => $this->whenLoaded('roles', function () {
+                return $this->roles->pluck('name');
+            }, []),
+            'permissions' => $this->when(method_exists($this, 'getAllPermissions'), function () {
+                return $this->getAllPermissions()->pluck('name');
+            }, []),
         ];
     }
 }

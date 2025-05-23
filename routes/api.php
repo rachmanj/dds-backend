@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 
 // Public authentication routes
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/token-login', [AuthController::class, 'tokenLogin']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -20,6 +21,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Resources
     Route::apiResource('projects', ProjectController::class);
     Route::apiResource('departments', DepartmentController::class);
+    Route::apiResource('addoc-types', AdditionalDocumentTypeController::class);
+    Route::apiResource('invoice-types', InvoiceTypeController::class);
 });
-Route::apiResource('addoc-types', AdditionalDocumentTypeController::class);
-Route::apiResource('invoice-types', InvoiceTypeController::class);

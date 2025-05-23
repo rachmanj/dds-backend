@@ -24,6 +24,7 @@ return [
         'http://127.0.0.1:3000',
         'http://localhost',
         'http://localhost:8000',
+        'http://127.0.0.1:8000',
         env('FRONTEND_URL', 'http://localhost:3000')
     ],
 
@@ -35,7 +36,10 @@ return [
         'Content-Type',
         'Accept',
         'Authorization',
-        'X-Handle-As-Json'
+        'X-Handle-As-Json',
+        'Origin',
+        'Access-Control-Request-Method',
+        'Access-Control-Request-Headers',
     ],
 
     'exposed_headers' => ['*'],

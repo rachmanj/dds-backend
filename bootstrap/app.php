@@ -12,14 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Enable sessions for API routes
-        $middleware->statefulApi();
-
-        // Add session middleware to API group
+        // Simple API middleware for token-based authentication
         $middleware->group('api', [
-            \Illuminate\Session\Middleware\StartSession::class,
             \App\Http\Middleware\ForceJsonResponse::class,
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
 
         // Configure web middleware
