@@ -25,10 +25,15 @@ return [
         'http://localhost',
         'http://localhost:8000',
         'http://127.0.0.1:8000',
+        'http://103.23.198.4',  // Production frontend IP
+        'https://103.23.198.4', // Production frontend IP with HTTPS
         env('FRONTEND_URL', 'http://localhost:3000')
     ],
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '/^http:\/\/103\.23\.198\.\d+$/',  // Allow any port on the production IP
+        '/^https:\/\/103\.23\.198\.\d+$/', // Allow any port on the production IP with HTTPS
+    ],
 
     'allowed_headers' => [
         'X-CSRF-TOKEN',
