@@ -2,39 +2,39 @@
 
 namespace App\Services;
 
-use App\Repositories\AdditionalDocumentTypeRepository;
+use App\Repositories\AdditionalDocumentRepository;
 
 class AdditionalDocumentService
 {
-    private AdditionalDocumentTypeRepository $additionalDocumentTypeRepository;
+    protected AdditionalDocumentRepository $additionalDocumentRepository;
 
-    public function __construct(AdditionalDocumentTypeRepository $additionalDocumentTypeRepository)
+    public function __construct(AdditionalDocumentRepository $additionalDocumentRepository)
     {
-        $this->additionalDocumentTypeRepository = $additionalDocumentTypeRepository;
+        $this->additionalDocumentRepository = $additionalDocumentRepository;
     }
 
-    public function getAll()
+    public function getAll(array $fields = ['*'], int $perPage = 15)
     {
-        return $this->additionalDocumentTypeRepository->getAll();
+        return $this->additionalDocumentRepository->getAll($fields, $perPage);
     }
 
-    public function getById($id)
+    public function getById(int $id, array $fields = ['*'])
     {
-        return $this->additionalDocumentTypeRepository->getById($id);
+        return $this->additionalDocumentRepository->getById($id, $fields);
     }
 
     public function create(array $data)
     {
-        return $this->additionalDocumentTypeRepository->create($data);
+        return $this->additionalDocumentRepository->create($data);
     }
 
-    public function update($id, array $data)
+    public function update(int $id, array $data)
     {
-        return $this->additionalDocumentTypeRepository->update($id, $data);
+        return $this->additionalDocumentRepository->update($id, $data);
     }
 
-    public function delete($id)
+    public function delete(int $id)
     {
-        return $this->additionalDocumentTypeRepository->delete($id);
+        return $this->additionalDocumentRepository->delete($id);
     }
 }

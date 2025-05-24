@@ -8,6 +8,8 @@ use App\Http\Controllers\InvoiceTypeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\AdditionalDocumentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +27,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('addoc-types', AdditionalDocumentTypeController::class);
     Route::apiResource('invoice-types', InvoiceTypeController::class);
     Route::apiResource('suppliers', SupplierController::class);
+    Route::apiResource('invoices', InvoiceController::class);
+    Route::apiResource('additional-documents', AdditionalDocumentController::class);
     Route::get('/user', [AuthController::class, 'me']);
 
     // Authenticated user routes
