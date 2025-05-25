@@ -21,16 +21,8 @@ class AdditionalDocumentRequest extends FormRequest
             'project' => 'nullable|string|max:50',
             'receive_date' => 'nullable|date',
             'created_by' => 'required|exists:users,id',
-            'attachment' => 'nullable|string',
             'remarks' => 'nullable|string',
-            'flag' => 'nullable|string|max:30',
-            'status' => 'required|string|max:20',
             'cur_loc' => 'nullable|string|max:30',
-            'ito_creator' => 'nullable|string|max:50',
-            'grpo_no' => 'nullable|string|max:20',
-            'origin_wh' => 'nullable|string|max:20',
-            'destination_wh' => 'nullable|string|max:20',
-            'batch_no' => 'nullable|integer',
         ];
     }
-} 
+}

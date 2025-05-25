@@ -20,6 +20,7 @@ class InvoiceController extends Controller
     {
         $perPage = $request->input('per_page', 15);
         $invoices = $this->invoiceService->getAll(['*'], $perPage);
+
         return InvoiceResource::collection($invoices);
     }
 
@@ -32,13 +33,13 @@ class InvoiceController extends Controller
     public function show(int $id)
     {
         $invoice = $this->invoiceService->getById($id);
-        
+
         if (!$invoice) {
             return response()->json([
                 'message' => 'Invoice not found'
             ], 404);
         }
-        
+
         return new InvoiceResource($invoice);
     }
 
@@ -53,4 +54,4 @@ class InvoiceController extends Controller
         $this->invoiceService->delete($id);
         return response()->json(null, 204);
     }
-} 
+}

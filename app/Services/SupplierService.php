@@ -18,8 +18,13 @@ class SupplierService
         return $this->supplierRepository->getAll($fields);
     }
 
+    public function getPaginated(int $perPage = 10, string $search = '')
+    {
+        return $this->supplierRepository->getPaginated($perPage, $search);
+    }
+
     public function getById(int $id, array $fields = ['*'])
-    {   
+    {
         return $this->supplierRepository->getById($id, $fields);
     }
 

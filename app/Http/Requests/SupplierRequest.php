@@ -21,15 +21,22 @@ class SupplierRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'sap_code' => 'nullable|string|max:50',
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:50|in:vendor,customer',
             'city' => 'nullable|string|max:255',
-            'payment_project' => 'sometimes|string|max:10|default:001H',
+            'payment_project' => 'required|string|max:10',
+            'is_active' => 'boolean',
             'address' => 'nullable|string',
             'npwp' => 'nullable|string|max:50',
-            'created_by' => 'required|exists:users,id',
         ];
+
+        // Only require created_by for POST requests (create)
+        if ($this->isMethod('POST')) {
+            $rules['created_by'] = 'required|exists:users,id';
+        }
+
+        return $rules;
     }
 }

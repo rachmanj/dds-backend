@@ -18,6 +18,10 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/token-login', [AuthController::class, 'tokenLogin']);
 
 // Protected routes
+Route::get('/user', function (Request $request) {
+    return $request->user();
+});
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -29,7 +33,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('suppliers', SupplierController::class);
     Route::apiResource('invoices', InvoiceController::class);
     Route::apiResource('additional-documents', AdditionalDocumentController::class);
-    Route::get('/user', [AuthController::class, 'me']);
 
     // Authenticated user routes
     Route::get('/auth-user/roles', [UserRoleController::class, 'getAuthUserRoles']);

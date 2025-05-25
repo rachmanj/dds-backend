@@ -25,7 +25,8 @@ class SupplierResource extends JsonResource
             'address' => $this->address,
             'npwp' => $this->npwp,
             'created_by' => $this->createdBy?->name,
-
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }
