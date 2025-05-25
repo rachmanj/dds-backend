@@ -20,7 +20,7 @@ class AdditionalDocumentRequest extends FormRequest
             'po_no' => 'nullable|string|max:50',
             'project' => 'nullable|string|max:50',
             'receive_date' => 'nullable|date',
-            'created_by' => 'required|exists:users,id',
+            'created_by' => 'nullable|exists:users,id',
             'remarks' => 'nullable|string',
             'cur_loc' => 'nullable|string|max:30',
         ];

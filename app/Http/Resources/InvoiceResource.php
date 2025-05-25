@@ -12,8 +12,10 @@ class InvoiceResource extends JsonResource
         return [
             'id' => $this->id,
             'invoice_number' => $this->invoice_number,
+            'faktur_no' => $this->faktur_no,
             'invoice_date' => $this->invoice_date,
             'receive_date' => $this->receive_date,
+            'supplier_id' => $this->supplier_id,
             'supplier' => new SupplierResource($this->whenLoaded('supplier')),
             'po_no' => $this->po_no,
             'receive_project' => $this->receive_project,
@@ -21,12 +23,18 @@ class InvoiceResource extends JsonResource
             'payment_project' => $this->payment_project,
             'currency' => $this->currency,
             'amount' => $this->amount,
+            'type_id' => $this->type_id,
             'type' => new InvoiceTypeResource($this->whenLoaded('type')),
             'payment_date' => $this->payment_date,
             'remarks' => $this->remarks,
             'cur_loc' => $this->cur_loc,
             'status' => $this->status,
-            'creator' => new UserResource($this->whenLoaded('creator')),
+            'creator' => $this->whenLoaded('creator', function () {
+                return [
+                    'id' => $this->creator->id,
+                    'name' => $this->creator->name,
+                ];
+            }),
             'duration1' => $this->duration1,
             'duration2' => $this->duration2,
             'sap_doc' => $this->sap_doc,
@@ -35,4 +43,4 @@ class InvoiceResource extends JsonResource
             'updated_at' => $this->updated_at,
         ];
     }
-} 
+}

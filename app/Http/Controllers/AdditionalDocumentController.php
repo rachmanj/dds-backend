@@ -6,6 +6,7 @@ use App\Services\AdditionalDocumentService;
 use App\Http\Resources\AdditionalDocumentResource;
 use App\Http\Requests\AdditionalDocumentRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AdditionalDocumentController extends Controller
 {
@@ -25,26 +26,32 @@ class AdditionalDocumentController extends Controller
 
     public function store(AdditionalDocumentRequest $request)
     {
-        $document = $this->additionalDocumentService->create($request->validated());
+        $data = $request->validated();
+        $data['created_by'] = Auth::id();
+
+        $document = $this->additionalDocumentService->create($data);
         return new AdditionalDocumentResource($document);
     }
 
     public function show(int $id)
     {
         $document = $this->additionalDocumentService->getById($id);
-        
+
         if (!$document) {
             return response()->json([
                 'message' => 'Additional document not found'
             ], 404);
         }
-        
+
         return new AdditionalDocumentResource($document);
     }
 
-    public function update(int $id, Request $request)
+    public function update(int $id, AdditionalDocumentRequest $request)
     {
-        $document = $this->additionalDocumentService->update($id, $request->all());
+        $data = $request->validated();
+        unset($data['created_by']); // Don't allow updating created_by
+
+        $document = $this->additionalDocumentService->update($id, $data);
         return new AdditionalDocumentResource($document);
     }
 
@@ -53,4 +60,4 @@ class AdditionalDocumentController extends Controller
         $this->additionalDocumentService->delete($id);
         return response()->json(null, 204);
     }
-} 
+}

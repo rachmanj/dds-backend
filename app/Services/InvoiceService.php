@@ -25,16 +25,26 @@ class InvoiceService
 
     public function create(array $data)
     {
+        $data['created_by'] = request()->user()->id;
+        $data['receive_project'] = $data['receive_project'] ?? request()->user()->project;
         return $this->invoiceRepository->create($data);
     }
 
     public function update(int $id, array $data)
     {
-        return $this->invoiceRepository->update($id, $data);
+        try {
+            return $this->invoiceRepository->update($id, $data);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     public function delete(int $id)
     {
-        return $this->invoiceRepository->delete($id);
+        try {
+            return $this->invoiceRepository->delete($id);
+        } catch (\Exception $e) {
+            return false;
+        }
     }
-} 
+}

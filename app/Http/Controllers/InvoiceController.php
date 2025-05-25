@@ -26,7 +26,13 @@ class InvoiceController extends Controller
 
     public function store(InvoiceRequest $request)
     {
-        $invoice = $this->invoiceService->create($request->validated());
+        $data = $request->validated();
+
+        // Auto-populate receive_project with authenticated user's project
+        $user = $request->user();
+        $data['receive_project'] = $user->project ?? null;
+
+        $invoice = $this->invoiceService->create($data);
         return new InvoiceResource($invoice);
     }
 
@@ -43,15 +49,37 @@ class InvoiceController extends Controller
         return new InvoiceResource($invoice);
     }
 
-    public function update(int $id, Request $request)
+    public function update(int $id, InvoiceRequest $request)
     {
-        $invoice = $this->invoiceService->update($id, $request->all());
+        // Set the invoice ID in the request for validation
+        $request->merge(['invoice_id' => $id]);
+
+        $validatedData = $request->validated();
+
+        // Remove invoice_id from the data as it's only used for validation
+        unset($validatedData['invoice_id']);
+
+        $invoice = $this->invoiceService->update($id, $validatedData);
+
+        if (!$invoice) {
+            return response()->json([
+                'message' => 'Invoice not found'
+            ], 404);
+        }
+
         return new InvoiceResource($invoice);
     }
 
     public function destroy(int $id)
     {
-        $this->invoiceService->delete($id);
+        $deleted = $this->invoiceService->delete($id);
+
+        if (!$deleted) {
+            return response()->json([
+                'message' => 'Invoice not found'
+            ], 404);
+        }
+
         return response()->json(null, 204);
     }
 }

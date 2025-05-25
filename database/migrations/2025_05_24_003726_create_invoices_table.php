@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
             $table->string('invoice_number');
+            $table->string('faktur_no')->nullable();
             $table->date('invoice_date');
             $table->date('receive_date'); // receive date from supplier
             $table->foreignId('supplier_id')->constrained('suppliers');
