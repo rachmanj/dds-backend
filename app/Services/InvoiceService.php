@@ -47,4 +47,9 @@ class InvoiceService
             return false;
         }
     }
+
+    public function validateInvoiceNumber(string $invoiceNumber, int $supplierId, ?int $invoiceId = null): bool
+    {
+        return $this->invoiceRepository->validateInvoiceNumber($invoiceNumber, $supplierId, $invoiceId);
+    }
 }

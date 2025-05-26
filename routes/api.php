@@ -25,6 +25,9 @@ Route::get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // Validation routes
+    Route::post('/invoices/validate-number', [InvoiceController::class, 'validateInvoiceNumber']);
+
     // Resources
     Route::apiResource('projects', ProjectController::class);
     Route::apiResource('departments', DepartmentController::class);

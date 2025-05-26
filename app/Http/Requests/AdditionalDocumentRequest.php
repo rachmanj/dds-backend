@@ -18,7 +18,6 @@ class AdditionalDocumentRequest extends FormRequest
             'document_number' => 'required|string',
             'document_date' => 'required|date',
             'po_no' => 'nullable|string|max:50',
-            'project' => 'nullable|string|max:50',
             'receive_date' => 'nullable|date',
             'created_by' => 'nullable|exists:users,id',
             'remarks' => 'nullable|string',

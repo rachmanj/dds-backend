@@ -82,4 +82,24 @@ class InvoiceController extends Controller
 
         return response()->json(null, 204);
     }
+
+    public function validateInvoiceNumber(Request $request)
+    {
+        $request->validate([
+            'invoice_number' => 'required|string',
+            'supplier_id' => 'required|integer',
+            'invoice_id' => 'nullable|integer' // For edit mode
+        ]);
+
+        $isValid = $this->invoiceService->validateInvoiceNumber(
+            $request->invoice_number,
+            $request->supplier_id,
+            $request->invoice_id
+        );
+
+        return response()->json([
+            'valid' => $isValid,
+            'message' => $isValid ? 'Invoice number is available' : 'This invoice number already exists for the selected supplier'
+        ]);
+    }
 }

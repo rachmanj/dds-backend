@@ -38,4 +38,17 @@ class InvoiceRepository
     {
         return Invoice::findOrFail($id)->delete();
     }
+
+    public function validateInvoiceNumber(string $invoiceNumber, int $supplierId, ?int $invoiceId = null): bool
+    {
+        $query = Invoice::where('invoice_number', $invoiceNumber)
+            ->where('supplier_id', $supplierId);
+
+        // If we're updating an existing invoice, exclude it from the check
+        if ($invoiceId) {
+            $query->where('id', '!=', $invoiceId);
+        }
+
+        return !$query->exists();
+    }
 }
