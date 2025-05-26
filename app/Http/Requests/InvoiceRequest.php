@@ -14,15 +14,22 @@ class InvoiceRequest extends FormRequest
 
     public function rules(): array
     {
-        $invoiceId = $this->input('invoice_id'); // Get invoice ID from request data for updates
+        $invoiceId = $this->route('invoice') ?? $this->input('invoice_id'); // Get invoice ID from route or request data
+        $supplierId = $this->input('supplier_id');
 
         return [
             'invoice_id' => 'sometimes|integer', // Allow invoice_id for updates
             'invoice_number' => [
                 'required',
                 'string',
+                'max:255',
                 Rule::unique('invoices', 'invoice_number')
-                    ->where('supplier_id', $this->supplier_id)
+                    ->where(function ($query) use ($supplierId) {
+                        if ($supplierId) {
+                            return $query->where('supplier_id', $supplierId);
+                        }
+                        return $query;
+                    })
                     ->ignore($invoiceId)
             ],
             'faktur_no' => 'nullable|string|max:255',
