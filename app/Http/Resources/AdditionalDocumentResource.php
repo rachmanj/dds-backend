@@ -28,8 +28,9 @@ class AdditionalDocumentResource extends JsonResource
             'origin_wh' => $this->origin_wh,
             'destination_wh' => $this->destination_wh,
             'batch_no' => $this->batch_no,
+            'invoices' => InvoiceResource::collection($this->whenLoaded('invoices')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
     }
-} 
+}

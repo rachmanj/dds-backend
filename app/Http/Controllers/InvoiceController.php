@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\InvoiceService;
 use App\Http\Resources\InvoiceResource;
+use App\Http\Resources\AdditionalDocumentResource;
 use App\Http\Requests\InvoiceRequest;
 use Illuminate\Http\Request;
 
@@ -100,6 +101,79 @@ class InvoiceController extends Controller
         return response()->json([
             'valid' => $isValid,
             'message' => $isValid ? 'Invoice number is available' : 'This invoice number already exists for the selected supplier'
+        ]);
+    }
+
+    public function getAdditionalDocuments(int $id)
+    {
+        $invoice = $this->invoiceService->getById($id);
+
+        if (!$invoice) {
+            return response()->json([
+                'message' => 'Invoice not found'
+            ], 404);
+        }
+
+        return AdditionalDocumentResource::collection($invoice->additionalDocuments);
+    }
+
+    public function attachAdditionalDocument(int $id, Request $request)
+    {
+        $request->validate([
+            'additional_document_id' => 'required|integer|exists:additional_documents,id'
+        ]);
+
+        $invoice = $this->invoiceService->getById($id);
+
+        if (!$invoice) {
+            return response()->json([
+                'message' => 'Invoice not found'
+            ], 404);
+        }
+
+        $invoice->additionalDocuments()->attach($request->additional_document_id);
+
+        return response()->json([
+            'message' => 'Additional document attached successfully'
+        ]);
+    }
+
+    public function detachAdditionalDocument(int $id, int $documentId)
+    {
+        $invoice = $this->invoiceService->getById($id);
+
+        if (!$invoice) {
+            return response()->json([
+                'message' => 'Invoice not found'
+            ], 404);
+        }
+
+        $invoice->additionalDocuments()->detach($documentId);
+
+        return response()->json([
+            'message' => 'Additional document detached successfully'
+        ]);
+    }
+
+    public function syncAdditionalDocuments(int $id, Request $request)
+    {
+        $request->validate([
+            'additional_document_ids' => 'required|array',
+            'additional_document_ids.*' => 'integer|exists:additional_documents,id'
+        ]);
+
+        $invoice = $this->invoiceService->getById($id);
+
+        if (!$invoice) {
+            return response()->json([
+                'message' => 'Invoice not found'
+            ], 404);
+        }
+
+        $invoice->additionalDocuments()->sync($request->additional_document_ids);
+
+        return response()->json([
+            'message' => 'Additional documents synchronized successfully'
         ]);
     }
 }

@@ -37,6 +37,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('invoices', InvoiceController::class);
     Route::apiResource('additional-documents', AdditionalDocumentController::class);
 
+    // Invoice-AdditionalDocument relationship routes
+    Route::get('/invoices/{id}/additional-documents', [InvoiceController::class, 'getAdditionalDocuments']);
+    Route::post('/invoices/{id}/additional-documents', [InvoiceController::class, 'attachAdditionalDocument']);
+    Route::delete('/invoices/{id}/additional-documents/{documentId}', [InvoiceController::class, 'detachAdditionalDocument']);
+    Route::put('/invoices/{id}/additional-documents', [InvoiceController::class, 'syncAdditionalDocuments']);
+
+    // AdditionalDocument-Invoice relationship routes
+    Route::get('/additional-documents/{id}/invoices', [AdditionalDocumentController::class, 'getInvoices']);
+    Route::post('/additional-documents/{id}/invoices', [AdditionalDocumentController::class, 'attachInvoice']);
+    Route::delete('/additional-documents/{id}/invoices/{invoiceId}', [AdditionalDocumentController::class, 'detachInvoice']);
+    Route::put('/additional-documents/{id}/invoices', [AdditionalDocumentController::class, 'syncInvoices']);
+
     // Authenticated user routes
     Route::get('/auth-user/roles', [UserRoleController::class, 'getAuthUserRoles']);
     Route::get('/auth-user/permissions', [UserRoleController::class, 'getAuthUserPermissions']);
