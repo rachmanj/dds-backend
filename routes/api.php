@@ -6,6 +6,8 @@ use App\Http\Controllers\AdditionalDocumentTypeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InvoiceTypeController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\InvoiceController;
@@ -27,6 +29,25 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Validation routes
     Route::post('/invoices/validate-number', [InvoiceController::class, 'validateInvoiceNumber']);
+
+    // User Management
+    Route::apiResource('users', UserController::class);
+    Route::get('/users/{id}/roles', [UserController::class, 'getRoles']);
+    Route::get('/users/{id}/permissions', [UserController::class, 'getPermissions']);
+    Route::post('/users/{id}/assign-roles', [UserController::class, 'assignRoles']);
+    Route::get('/available-roles', [UserController::class, 'getAvailableRoles']);
+
+    // Role Management
+    Route::apiResource('roles', RoleController::class);
+    Route::get('/roles/{id}/permissions', [RoleController::class, 'getPermissions']);
+    Route::post('/roles/{id}/assign-permissions', [RoleController::class, 'assignPermissions']);
+    Route::get('/roles/all/list', [RoleController::class, 'getAllRoles']);
+    Route::get('/available-permissions', [RoleController::class, 'getAvailablePermissions']);
+
+    // Permission Management
+    Route::apiResource('permissions', PermissionController::class);
+    Route::get('/permissions/all/list', [PermissionController::class, 'getAllPermissions']);
+    Route::get('/permissions/by-guard', [PermissionController::class, 'getPermissionsByGuard']);
 
     // Resources
     Route::apiResource('projects', ProjectController::class);
