@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Add CORS middleware globally
         $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
 
+        // Register permission middleware
+        $middleware->alias([
+            'permission' => \App\Http\Middleware\CheckPermission::class,
+        ]);
+
         // Simple API middleware for token-based authentication
         $middleware->group('api', [
             \App\Http\Middleware\ForceJsonResponse::class,

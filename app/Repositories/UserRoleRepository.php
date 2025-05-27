@@ -6,28 +6,32 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-
+use Illuminate\Database\Eloquent\Collection;
 
 class UserRoleRepository
 {
-    public function getUserRoles(int $userId)
+    public function getUserRoles(int $userId): Collection
     {
         return User::find($userId)->roles;
     }
 
-    public function getUserPermissions(int $userId)
+    public function getUserPermissions(int $userId): Collection
     {
-        return User::find($userId)->permissions;
+        /** @var User $user */
+        $user = User::find($userId);
+        return $user->getAllPermissions();
     }
 
-    public function getAuthUserRoles()
+    public function getAuthUserRoles(): Collection
     {
         return Auth::user()->roles;
     }
 
-    public function getAuthUserPermissions()
+    public function getAuthUserPermissions(): Collection
     {
-        return Auth::user()->permissions;
+        /** @var User $user */
+        $user = Auth::user();
+        return $user->getAllPermissions();
     }
 
     public function assignRoleToUser(int $userId, int $roleId)

@@ -6,11 +6,12 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\JsonResponse;
 
 class AuthRepository
 {
 
-    public function register(array $data)
+    public function register(array $data): User
     {
         return User::create([
             'name' => $data['name'],
@@ -23,7 +24,7 @@ class AuthRepository
         ]);
     }
 
-    public function login(array $data)
+    public function login(array $data): JsonResponse
     {
         $credentials = [
             'email' => $data['email'],
@@ -46,7 +47,7 @@ class AuthRepository
         ], 200);
     }
 
-    public function tokenLogin(array $data)
+    public function tokenLogin(array $data): JsonResponse
     {
         if (!Auth::attempt([
             'email' => $data['email'],
@@ -57,7 +58,11 @@ class AuthRepository
             ], 401);
         }
 
+        /** @var User $user */
         $user = Auth::user();
+
+        // Load roles and permissions for the user
+        $user->load(['roles.permissions', 'permissions']);
 
         $token = $user->createToken('apiToken')->plainTextToken;
 

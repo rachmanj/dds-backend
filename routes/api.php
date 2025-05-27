@@ -27,6 +27,10 @@ Route::get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // User permission routes
+    Route::get('/auth/user-roles', [UserRoleController::class, 'getAuthUserRoles']);
+    Route::get('/auth/user-permissions', [UserRoleController::class, 'getAuthUserPermissions']);
+
     // Validation routes
     Route::post('/invoices/validate-number', [InvoiceController::class, 'validateInvoiceNumber']);
 
@@ -69,8 +73,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/additional-documents/{id}/invoices', [AdditionalDocumentController::class, 'attachInvoice']);
     Route::delete('/additional-documents/{id}/invoices/{invoiceId}', [AdditionalDocumentController::class, 'detachInvoice']);
     Route::put('/additional-documents/{id}/invoices', [AdditionalDocumentController::class, 'syncInvoices']);
-
-    // Authenticated user routes
-    Route::get('/auth-user/roles', [UserRoleController::class, 'getAuthUserRoles']);
-    Route::get('/auth-user/permissions', [UserRoleController::class, 'getAuthUserPermissions']);
 });
