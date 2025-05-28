@@ -45,13 +45,14 @@ class DatabaseSeeder extends Seeder
             ProjectsTableSeeder::class,
             // InvoiceTypeSeeder::class,
             // AddocTypeSeeder::class,
-            RolePermissionSeeder::class,
+            // RolePermissionSeeder::class,
             UserSeeder::class, // Add our test user
+            DistributionTypeSeeder::class,
         ]);
 
         // attach role to user
         $superuser = User::where('username', 'superadmin')->first();
-        $superuser->assignRole('superadmin');
+        $superuser->assignRole('super-admin');
 
         $user = User::where('username', 'prana')->first();
         $user->assignRole('accounting');

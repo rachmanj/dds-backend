@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Invoice extends Model
 {
@@ -57,5 +58,12 @@ class Invoice extends Model
     public function additionalDocuments(): BelongsToMany
     {
         return $this->belongsToMany(AdditionalDocument::class);
+    }
+
+    public function distributions(): MorphToMany
+    {
+        return $this->morphToMany(Distribution::class, 'document', 'distribution_documents')
+            ->withPivot(['sender_verified', 'receiver_verified'])
+            ->withTimestamps();
     }
 }

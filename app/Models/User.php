@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -62,5 +63,26 @@ class User extends Authenticatable
     public function location()
     {
         return $this->department ? $this->department->location_code : null;
+    }
+
+    // Distribution relationships
+    public function createdDistributions(): HasMany
+    {
+        return $this->hasMany(Distribution::class, 'created_by');
+    }
+
+    public function senderVerifiedDistributions(): HasMany
+    {
+        return $this->hasMany(Distribution::class, 'sender_verified_by');
+    }
+
+    public function receiverVerifiedDistributions(): HasMany
+    {
+        return $this->hasMany(Distribution::class, 'receiver_verified_by');
+    }
+
+    public function distributionHistories(): HasMany
+    {
+        return $this->hasMany(DistributionHistory::class);
     }
 }

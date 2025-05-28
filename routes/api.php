@@ -12,6 +12,10 @@ use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\AdditionalDocumentController;
+use App\Http\Controllers\Api\DistributionTypeController;
+use App\Http\Controllers\Api\DistributionController;
+use App\Http\Controllers\Api\InvoiceController as ApiInvoiceController;
+use App\Http\Controllers\Api\AdditionalDocumentController as ApiAdditionalDocumentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Validation routes
     Route::post('/invoices/validate-number', [InvoiceController::class, 'validateInvoiceNumber']);
+    Route::post('/distribution-types/validate-code', [DistributionTypeController::class, 'validateCode']);
 
     // User Management
     Route::apiResource('users', UserController::class);
@@ -61,6 +66,35 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('suppliers', SupplierController::class);
     Route::apiResource('invoices', InvoiceController::class);
     Route::apiResource('additional-documents', AdditionalDocumentController::class);
+
+    // Distribution Management
+    Route::apiResource('distribution-types', DistributionTypeController::class);
+    Route::apiResource('distributions', DistributionController::class);
+
+    // Distribution workflow routes
+    Route::post('/distributions/{id}/attach-documents', [DistributionController::class, 'attachDocuments']);
+    Route::delete('/distributions/{id}/detach-document/{documentType}/{documentId}', [DistributionController::class, 'detachDocument']);
+    Route::post('/distributions/{id}/verify-sender', [DistributionController::class, 'verifySender']);
+    Route::post('/distributions/{id}/send', [DistributionController::class, 'send']);
+    Route::post('/distributions/{id}/receive', [DistributionController::class, 'receive']);
+    Route::post('/distributions/{id}/verify-receiver', [DistributionController::class, 'verifyReceiver']);
+    Route::post('/distributions/{id}/complete', [DistributionController::class, 'complete']);
+
+    // Distribution query routes
+    Route::get('/distributions/{id}/history', [DistributionController::class, 'history']);
+    Route::get('/distributions/{id}/transmittal', [DistributionController::class, 'transmittal']);
+    Route::get('/distributions/{id}/transmittal-preview', [DistributionController::class, 'transmittalPreview']);
+    Route::get('/distributions/by-department/{departmentId}', [DistributionController::class, 'byDepartment']);
+    Route::get('/distributions/by-status/{status}', [DistributionController::class, 'byStatus']);
+    Route::get('/distributions/by-user/{userId}', [DistributionController::class, 'byUser']);
+
+    // Location-based document routes for distribution
+    Route::get('/invoices-for-distribution', [ApiInvoiceController::class, 'forDistribution']);
+    Route::get('/additional-documents-for-distribution', [ApiAdditionalDocumentController::class, 'forDistribution']);
+    Route::get('/invoices-location-filtered', [ApiInvoiceController::class, 'index']);
+    Route::get('/additional-documents-location-filtered', [ApiAdditionalDocumentController::class, 'index']);
+    Route::get('/invoices-location-filtered/{id}', [ApiInvoiceController::class, 'show']);
+    Route::get('/additional-documents-location-filtered/{id}', [ApiAdditionalDocumentController::class, 'show']);
 
     // Invoice-AdditionalDocument relationship routes
     Route::get('/invoices/{id}/additional-documents', [InvoiceController::class, 'getAdditionalDocuments']);

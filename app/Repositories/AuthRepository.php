@@ -61,8 +61,8 @@ class AuthRepository
         /** @var User $user */
         $user = Auth::user();
 
-        // Load roles and permissions for the user
-        $user->load(['roles.permissions', 'permissions']);
+        // Load roles, permissions, and department for the user
+        $user->load(['roles.permissions', 'permissions', 'department']);
 
         $token = $user->createToken('apiToken')->plainTextToken;
 
