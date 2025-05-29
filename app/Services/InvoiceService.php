@@ -25,14 +25,32 @@ class InvoiceService
 
     public function create(array $data)
     {
-        $data['created_by'] = request()->user()->id;
-        $data['receive_project'] = $data['receive_project'] ?? request()->user()->project;
+        $user = request()->user();
+        $data['created_by'] = $user->id;
+        $data['receive_project'] = $data['receive_project'] ?? $user->project;
+
+        // Set default cur_loc to user's department location_code if not provided
+        if (empty($data['cur_loc']) && $user->department && $user->department->location_code) {
+            $data['cur_loc'] = $user->department->location_code;
+        }
+
         return $this->invoiceRepository->create($data);
     }
 
     public function update(int $id, array $data)
     {
         try {
+            $user = request()->user();
+
+            // Check if user is trying to edit cur_loc
+            if (isset($data['cur_loc'])) {
+                // Check if user has permission to edit cur_loc
+                if (!$user->can('document.edit-cur_loc')) {
+                    // Remove cur_loc from data if user doesn't have permission
+                    unset($data['cur_loc']);
+                }
+            }
+
             return $this->invoiceRepository->update($id, $data);
         } catch (\Exception $e) {
             return null;

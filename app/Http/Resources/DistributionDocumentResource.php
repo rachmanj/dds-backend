@@ -28,6 +28,10 @@ class DistributionDocumentResource extends JsonResource
             'document_id' => $this->document_id,
             'sender_verified' => $this->sender_verified,
             'receiver_verified' => $this->receiver_verified,
+            'sender_verification_status' => $this->sender_verification_status,
+            'sender_verification_notes' => $this->sender_verification_notes,
+            'receiver_verification_status' => $this->receiver_verification_status,
+            'receiver_verification_notes' => $this->receiver_verification_notes,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'document' => $this->whenLoaded('document', function () {

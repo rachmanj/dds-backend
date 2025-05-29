@@ -25,11 +25,30 @@ class AdditionalDocumentService
 
     public function create(array $data)
     {
+        $user = request()->user();
+        $data['created_by'] = $user->id;
+
+        // Set default cur_loc to user's department location_code if not provided
+        if (empty($data['cur_loc']) && $user->department && $user->department->location_code) {
+            $data['cur_loc'] = $user->department->location_code;
+        }
+
         return $this->additionalDocumentRepository->create($data);
     }
 
     public function update(int $id, array $data)
     {
+        $user = request()->user();
+
+        // Check if user is trying to edit cur_loc
+        if (isset($data['cur_loc'])) {
+            // Check if user has permission to edit cur_loc
+            if (!$user->can('document.edit-cur_loc')) {
+                // Remove cur_loc from data if user doesn't have permission
+                unset($data['cur_loc']);
+            }
+        }
+
         return $this->additionalDocumentRepository->update($id, $data);
     }
 

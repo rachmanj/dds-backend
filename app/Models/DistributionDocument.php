@@ -15,7 +15,11 @@ class DistributionDocument extends Model
         'document_type',
         'document_id',
         'sender_verified',
-        'receiver_verified'
+        'receiver_verified',
+        'sender_verification_status',
+        'sender_verification_notes',
+        'receiver_verification_status',
+        'receiver_verification_notes'
     ];
 
     protected $casts = [
@@ -43,5 +47,26 @@ class DistributionDocument extends Model
     public function additionalDocument()
     {
         return $this->document_type === 'App\\Models\\AdditionalDocument' ? $this->document : null;
+    }
+
+    // Helper methods for verification status
+    public function isVerifiedBySender(): bool
+    {
+        return $this->sender_verified && $this->sender_verification_status === 'verified';
+    }
+
+    public function isVerifiedByReceiver(): bool
+    {
+        return $this->receiver_verified && $this->receiver_verification_status === 'verified';
+    }
+
+    public function hasSenderDiscrepancy(): bool
+    {
+        return $this->sender_verified && in_array($this->sender_verification_status, ['missing', 'damaged']);
+    }
+
+    public function hasReceiverDiscrepancy(): bool
+    {
+        return $this->receiver_verified && in_array($this->receiver_verification_status, ['missing', 'damaged']);
     }
 }

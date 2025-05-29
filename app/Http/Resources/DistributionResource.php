@@ -28,10 +28,13 @@ class DistributionResource extends JsonResource
             'receiver_verified_by' => $this->receiver_verified_by,
             'sender_verified_at' => $this->sender_verified_at,
             'receiver_verified_at' => $this->receiver_verified_at,
+            'sender_verification_notes' => $this->sender_verification_notes,
+            'receiver_verification_notes' => $this->receiver_verification_notes,
+            'has_discrepancies' => $this->has_discrepancies,
             'sent_at' => $this->sent_at,
             'received_at' => $this->received_at,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
             'deleted_at' => $this->deleted_at,
 
             // Relationships

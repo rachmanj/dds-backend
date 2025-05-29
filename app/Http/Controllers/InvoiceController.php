@@ -49,7 +49,7 @@ class InvoiceController extends Controller
                 ], 400);
             }
 
-            $query = Invoice::with(['supplier', 'type'])
+            $query = Invoice::with(['supplier', 'type', 'creator'])
                 ->where('cur_loc', $userDepartment->location_code);
 
             // Apply filters
@@ -129,7 +129,7 @@ class InvoiceController extends Controller
             $user = Auth::user();
             $userDepartment = $user->department;
 
-            $invoice = Invoice::with(['supplier', 'type', 'additionalDocuments'])
+            $invoice = Invoice::with(['supplier', 'type', 'creator', 'additionalDocuments'])
                 ->where('id', $id)
                 ->where('cur_loc', $userDepartment->location_code)
                 ->first();

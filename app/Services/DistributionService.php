@@ -207,7 +207,7 @@ class DistributionService
         }
     }
 
-    public function verifySender(int $distributionId, array $documentVerifications = [])
+    public function verifySender(int $distributionId, array $documentVerifications = [], ?string $verificationNotes = null)
     {
         try {
             DB::beginTransaction();
@@ -219,13 +219,19 @@ class DistributionService
                 throw new \InvalidArgumentException('Distribution must be in draft status for sender verification.');
             }
 
-            // Update document verifications
+            // Update document verifications with enhanced status tracking
             foreach ($documentVerifications as $verification) {
+                $updateData = [
+                    'sender_verified' => true,
+                    'sender_verification_status' => $verification['status'] ?? 'verified', // Default to 'verified' for backward compatibility
+                    'sender_verification_notes' => $verification['notes'] ?? null
+                ];
+
                 $this->distributionRepository->updateDocumentVerification(
                     $distributionId,
                     $verification['document_type'],
                     $verification['document_id'],
-                    ['sender_verified' => true]
+                    $updateData
                 );
             }
 
@@ -233,7 +239,8 @@ class DistributionService
             $updatedDistribution = $this->distributionRepository->update($distributionId, [
                 'status' => 'verified_by_sender',
                 'sender_verified_at' => now(),
-                'sender_verified_by' => Auth::id()
+                'sender_verified_by' => Auth::id(),
+                'sender_verification_notes' => $verificationNotes
             ]);
 
             // Add history entry
@@ -339,7 +346,7 @@ class DistributionService
         }
     }
 
-    public function verifyReceiver(int $distributionId, array $documentVerifications = [])
+    public function verifyReceiver(int $distributionId, array $documentVerifications = [], ?string $verificationNotes = null, bool $forceCompleteWithDiscrepancies = false)
     {
         try {
             DB::beginTransaction();
@@ -351,30 +358,89 @@ class DistributionService
                 throw new \InvalidArgumentException('Distribution must be received before receiver verification.');
             }
 
-            // Update document verifications
+            $hasDiscrepancies = false;
+            $discrepancyDetails = [];
+
+            // Update document verifications with enhanced status tracking
             foreach ($documentVerifications as $verification) {
+                $updateData = [
+                    'receiver_verified' => true,
+                    'receiver_verification_status' => $verification['status'],
+                    'receiver_verification_notes' => $verification['notes'] ?? null
+                ];
+
+                // Track discrepancies
+                if (in_array($verification['status'], ['missing', 'damaged'])) {
+                    $hasDiscrepancies = true;
+                    $discrepancyDetails[] = [
+                        'document_type' => $verification['document_type'],
+                        'document_id' => $verification['document_id'],
+                        'status' => $verification['status'],
+                        'notes' => $verification['notes'] ?? null
+                    ];
+                }
+
                 $this->distributionRepository->updateDocumentVerification(
                     $distributionId,
                     $verification['document_type'],
                     $verification['document_id'],
-                    ['receiver_verified' => true]
+                    $updateData
                 );
+            }
+
+            // Check if we can proceed with discrepancies
+            if ($hasDiscrepancies && !$forceCompleteWithDiscrepancies) {
+                // Return distribution with discrepancy information for user confirmation
+                $distribution = $this->distributionRepository->getById($distributionId);
+                $distribution->discrepancy_details = $discrepancyDetails;
+
+                DB::rollBack();
+
+                // Create exception with additional data
+                $exception = new \InvalidArgumentException(
+                    'Documents have discrepancies. Please review and confirm to proceed. ' .
+                        'Discrepancy details: ' . json_encode($discrepancyDetails)
+                );
+                throw $exception;
             }
 
             // Update distribution status and verification timestamp
             $updatedDistribution = $this->distributionRepository->update($distributionId, [
                 'status' => 'verified_by_receiver',
                 'receiver_verified_at' => now(),
-                'receiver_verified_by' => Auth::id()
+                'receiver_verified_by' => Auth::id(),
+                'receiver_verification_notes' => $verificationNotes,
+                'has_discrepancies' => $hasDiscrepancies
             ]);
 
-            // Add history entry
+            // Add history entry with discrepancy information
+            $historyMessage = 'Distribution verified by receiver';
+            if ($hasDiscrepancies) {
+                $historyMessage .= ' (with discrepancies)';
+            }
+
             $this->distributionRepository->addHistory(
                 $distributionId,
                 'verified_by_receiver',
                 Auth::id(),
-                'Distribution verified by receiver'
+                $historyMessage
             );
+
+            // If there are discrepancies, add detailed history
+            if ($hasDiscrepancies) {
+                foreach ($discrepancyDetails as $discrepancy) {
+                    $this->distributionRepository->addHistory(
+                        $distributionId,
+                        'document_discrepancy',
+                        Auth::id(),
+                        "Document {$discrepancy['document_type']}:{$discrepancy['document_id']} marked as {$discrepancy['status']}" .
+                            ($discrepancy['notes'] ? " - {$discrepancy['notes']}" : '')
+                    );
+                }
+
+                // Send discrepancy notification to sender/origin department
+                $this->notificationService->sendDiscrepancyNotification($updatedDistribution, $discrepancyDetails);
+            }
 
             DB::commit();
 

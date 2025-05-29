@@ -82,6 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/distributions/{id}/history', [DistributionController::class, 'history']);
     Route::get('/distributions/{id}/transmittal', [DistributionController::class, 'transmittal']);
     Route::get('/distributions/{id}/transmittal-preview', [DistributionController::class, 'transmittalPreview']);
+    Route::get('/distributions/{id}/discrepancy-summary', [DistributionController::class, 'discrepancySummary']);
     Route::get('/distributions/by-department/{departmentId}', [DistributionController::class, 'byDepartment']);
     Route::get('/distributions/by-status/{status}', [DistributionController::class, 'byStatus']);
     Route::get('/distributions/by-user/{userId}', [DistributionController::class, 'byUser']);

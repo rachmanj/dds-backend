@@ -246,7 +246,11 @@ class DistributionController extends Controller
     {
         try {
             $validatedData = $request->validated();
-            $distribution = $this->distributionService->verifySender($id, $validatedData['document_verifications'] ?? []);
+            $distribution = $this->distributionService->verifySender(
+                $id,
+                $validatedData['document_verifications'] ?? [],
+                $validatedData['verification_notes'] ?? null
+            );
 
             return response()->json([
                 'success' => true,
@@ -328,7 +332,13 @@ class DistributionController extends Controller
     {
         try {
             $validatedData = $request->validated();
-            $distribution = $this->distributionService->verifyReceiver($id, $validatedData['document_verifications'] ?? []);
+
+            $distribution = $this->distributionService->verifyReceiver(
+                $id,
+                $validatedData['document_verifications'] ?? [],
+                $validatedData['verification_notes'] ?? null,
+                $validatedData['force_complete_with_discrepancies'] ?? false
+            );
 
             return response()->json([
                 'success' => true,
@@ -336,6 +346,26 @@ class DistributionController extends Controller
                 'data' => new DistributionResource($distribution)
             ]);
         } catch (\InvalidArgumentException $e) {
+            // Check if this is a discrepancy-related exception
+            if (str_contains($e->getMessage(), 'discrepancies')) {
+                // Parse discrepancy details from the exception message
+                $message = $e->getMessage();
+                $discrepancyData = null;
+
+                if (str_contains($message, 'Discrepancy details: ')) {
+                    $jsonStart = strpos($message, 'Discrepancy details: ') + strlen('Discrepancy details: ');
+                    $jsonString = substr($message, $jsonStart);
+                    $discrepancyData = json_decode($jsonString, true);
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Distribution has discrepancies that require confirmation',
+                    'requires_confirmation' => true,
+                    'discrepancy_details' => $discrepancyData
+                ], 422);
+            }
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
@@ -512,6 +542,28 @@ class DistributionController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve distributions',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get distribution discrepancy summary
+     */
+    public function discrepancySummary(int $id): JsonResponse
+    {
+        try {
+            $distribution = $this->distributionService->getById($id);
+            $summary = $distribution->getDiscrepancySummary();
+
+            return response()->json([
+                'success' => true,
+                'data' => $summary
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve discrepancy summary',
                 'error' => $e->getMessage()
             ], 500);
         }

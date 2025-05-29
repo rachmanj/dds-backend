@@ -21,25 +21,29 @@ class Distribution extends Model
         'created_by',
         'sender_verified_at',
         'sender_verified_by',
+        'sender_verification_notes',
         'sent_at',
         'received_at',
         'receiver_verified_at',
         'receiver_verified_by',
+        'receiver_verification_notes',
+        'has_discrepancies',
         'notes',
         'status'
     ];
 
     protected $hidden = [
-        'created_at',
-        'updated_at',
         'deleted_at'
     ];
 
     protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
         'sender_verified_at' => 'datetime',
         'sent_at' => 'datetime',
         'received_at' => 'datetime',
-        'receiver_verified_at' => 'datetime'
+        'receiver_verified_at' => 'datetime',
+        'has_discrepancies' => 'boolean'
     ];
 
     // Relationships
@@ -155,5 +159,82 @@ class Distribution extends Model
     public function isAdditionalDocumentDistribution(): bool
     {
         return $this->document_type === 'additional_document';
+    }
+
+    // Discrepancy helper methods
+    public function hasAnyDiscrepancies(): bool
+    {
+        return $this->has_discrepancies ||
+            $this->documents()->where(function ($query) {
+                $query->whereIn('sender_verification_status', ['missing', 'damaged'])
+                    ->orWhereIn('receiver_verification_status', ['missing', 'damaged']);
+            })->exists();
+    }
+
+    public function getDiscrepancySummary(): array
+    {
+        $summary = [
+            'has_discrepancies' => false,
+            'sender_discrepancies' => [],
+            'receiver_discrepancies' => [],
+            'total_documents' => 0,
+            'verified_documents' => 0,
+            'missing_documents' => 0,
+            'damaged_documents' => 0
+        ];
+
+        $documents = $this->documents()->with('document')->get();
+        $summary['total_documents'] = $documents->count();
+
+        foreach ($documents as $doc) {
+            // Check sender discrepancies
+            if ($doc->sender_verification_status === 'missing') {
+                $summary['sender_discrepancies'][] = [
+                    'type' => 'missing',
+                    'document_type' => $doc->document_type,
+                    'document_id' => $doc->document_id,
+                    'notes' => $doc->sender_verification_notes
+                ];
+                $summary['missing_documents']++;
+                $summary['has_discrepancies'] = true;
+            } elseif ($doc->sender_verification_status === 'damaged') {
+                $summary['sender_discrepancies'][] = [
+                    'type' => 'damaged',
+                    'document_type' => $doc->document_type,
+                    'document_id' => $doc->document_id,
+                    'notes' => $doc->sender_verification_notes
+                ];
+                $summary['damaged_documents']++;
+                $summary['has_discrepancies'] = true;
+            }
+
+            // Check receiver discrepancies
+            if ($doc->receiver_verification_status === 'missing') {
+                $summary['receiver_discrepancies'][] = [
+                    'type' => 'missing',
+                    'document_type' => $doc->document_type,
+                    'document_id' => $doc->document_id,
+                    'notes' => $doc->receiver_verification_notes
+                ];
+                $summary['missing_documents']++;
+                $summary['has_discrepancies'] = true;
+            } elseif ($doc->receiver_verification_status === 'damaged') {
+                $summary['receiver_discrepancies'][] = [
+                    'type' => 'damaged',
+                    'document_type' => $doc->document_type,
+                    'document_id' => $doc->document_id,
+                    'notes' => $doc->receiver_verification_notes
+                ];
+                $summary['damaged_documents']++;
+                $summary['has_discrepancies'] = true;
+            }
+
+            // Count verified documents
+            if ($doc->receiver_verification_status === 'verified') {
+                $summary['verified_documents']++;
+            }
+        }
+
+        return $summary;
     }
 }
