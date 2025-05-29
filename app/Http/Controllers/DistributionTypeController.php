@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\DistributionTypeService;
+use App\Http\Requests\DistributionTypeRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -40,16 +41,8 @@ class DistributionTypeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): JsonResponse
+    public function store(DistributionTypeRequest $request): JsonResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|size:1|unique:distribution_types,code',
-            'color' => 'required|string|size:7|regex:/^#[0-9A-Fa-f]{6}$/',
-            'priority' => 'required|integer|min:1|max:10',
-            'description' => 'nullable|string|max:1000'
-        ]);
-
         try {
             $distributionType = $this->distributionTypeService->create($request->validated());
 
@@ -95,16 +88,8 @@ class DistributionTypeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(DistributionTypeRequest $request, int $id): JsonResponse
     {
-        $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'code' => 'sometimes|required|string|size:1',
-            'color' => 'sometimes|required|string|size:7|regex:/^#[0-9A-Fa-f]{6}$/',
-            'priority' => 'sometimes|required|integer|min:1|max:10',
-            'description' => 'nullable|string|max:1000'
-        ]);
-
         try {
             $distributionType = $this->distributionTypeService->update($id, $request->validated());
 

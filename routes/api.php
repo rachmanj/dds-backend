@@ -12,10 +12,8 @@ use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\AdditionalDocumentController;
-use App\Http\Controllers\Api\DistributionTypeController;
-use App\Http\Controllers\Api\DistributionController;
-use App\Http\Controllers\Api\InvoiceController as ApiInvoiceController;
-use App\Http\Controllers\Api\AdditionalDocumentController as ApiAdditionalDocumentController;
+use App\Http\Controllers\DistributionTypeController;
+use App\Http\Controllers\DistributionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -89,12 +87,28 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/distributions/by-user/{userId}', [DistributionController::class, 'byUser']);
 
     // Location-based document routes for distribution
-    Route::get('/invoices-for-distribution', [ApiInvoiceController::class, 'forDistribution']);
-    Route::get('/additional-documents-for-distribution', [ApiAdditionalDocumentController::class, 'forDistribution']);
-    Route::get('/invoices-location-filtered', [ApiInvoiceController::class, 'index']);
-    Route::get('/additional-documents-location-filtered', [ApiAdditionalDocumentController::class, 'index']);
-    Route::get('/invoices-location-filtered/{id}', [ApiInvoiceController::class, 'show']);
-    Route::get('/additional-documents-location-filtered/{id}', [ApiAdditionalDocumentController::class, 'show']);
+    Route::get('/invoices-for-distribution', [InvoiceController::class, 'forDistribution']);
+    Route::get('/additional-documents-for-distribution', [AdditionalDocumentController::class, 'forDistribution']);
+
+    // Department-filtered invoice routes
+    Route::get('/invoices-location-filtered', function (Request $request) {
+        $request->merge(['filter_by_department' => true]);
+        return app(InvoiceController::class)->index($request);
+    });
+    Route::get('/invoices-location-filtered/{id}', function (Request $request, $id) {
+        $request->merge(['filter_by_department' => true]);
+        return app(InvoiceController::class)->show($id, $request);
+    });
+
+    // Department-filtered additional document routes
+    Route::get('/additional-documents-location-filtered', function (Request $request) {
+        $request->merge(['filter_by_department' => true]);
+        return app(AdditionalDocumentController::class)->index($request);
+    });
+    Route::get('/additional-documents-location-filtered/{id}', function (Request $request, $id) {
+        $request->merge(['filter_by_department' => true]);
+        return app(AdditionalDocumentController::class)->show($id, $request);
+    });
 
     // Invoice-AdditionalDocument relationship routes
     Route::get('/invoices/{id}/additional-documents', [InvoiceController::class, 'getAdditionalDocuments']);

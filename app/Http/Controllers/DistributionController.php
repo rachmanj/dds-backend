@@ -1,11 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DistributionResource;
 use App\Services\DistributionService;
 use App\Services\TransmittalAdviceService;
+use App\Http\Requests\DistributionRequest;
+use App\Http\Requests\AttachDocumentsRequest;
+use App\Http\Requests\VerifyDistributionRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -66,41 +69,10 @@ class DistributionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): JsonResponse
+    public function store(DistributionRequest $request): JsonResponse
     {
-        $request->validate([
-            'document_type' => 'required|string|in:invoice,additional_document',
-            'type_id' => 'required|integer|exists:distribution_types,id',
-            'origin_department_id' => 'required|integer|exists:departments,id',
-            'destination_department_id' => 'required|integer|exists:departments,id|different:origin_department_id',
-            'notes' => 'nullable|string|max:1000',
-            'documents' => 'required|array|min:1',
-            'documents.*.type' => 'required|string|in:invoice,additional_document',
-            'documents.*.id' => 'required|integer'
-        ]);
-
-        // Validate document type consistency
-        foreach ($request->documents as $document) {
-            if ($document['type'] !== $request->document_type) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "All documents must match the selected document type: {$request->document_type}"
-                ], 422);
-            }
-        }
-
-        // Additional validation for document existence will be handled in the service
         try {
-            // Get validated data manually
-            $validatedData = $request->only([
-                'document_type',
-                'type_id',
-                'origin_department_id',
-                'destination_department_id',
-                'notes',
-                'documents'
-            ]);
-
+            $validatedData = $request->validated();
             $distribution = $this->distributionService->create($validatedData);
 
             $response = [
@@ -153,22 +125,10 @@ class DistributionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(DistributionRequest $request, int $id): JsonResponse
     {
-        $request->validate([
-            'type_id' => 'sometimes|required|integer|exists:distribution_types,id',
-            'destination_department_id' => 'sometimes|required|integer|exists:departments,id',
-            'notes' => 'nullable|string|max:1000'
-        ]);
-
         try {
-            // Get validated data manually
-            $validatedData = $request->only([
-                'type_id',
-                'destination_department_id',
-                'notes'
-            ]);
-
+            $validatedData = $request->validated();
             $distribution = $this->distributionService->update($id, $validatedData);
 
             return response()->json([
@@ -221,16 +181,10 @@ class DistributionController extends Controller
     /**
      * Attach documents to distribution
      */
-    public function attachDocuments(Request $request, int $id): JsonResponse
+    public function attachDocuments(AttachDocumentsRequest $request, int $id): JsonResponse
     {
-        $request->validate([
-            'documents' => 'required|array',
-            'documents.*.type' => 'required|string|in:invoice,additional_document',
-            'documents.*.id' => 'required|integer'
-        ]);
-
         try {
-            $distribution = $this->distributionService->attachDocuments($id, $request->documents);
+            $distribution = $this->distributionService->attachDocuments($id, $request->validated()['documents']);
 
             return response()->json([
                 'success' => true,
@@ -288,16 +242,11 @@ class DistributionController extends Controller
     /**
      * Verify distribution by sender
      */
-    public function verifySender(Request $request, int $id): JsonResponse
+    public function verifySender(VerifyDistributionRequest $request, int $id): JsonResponse
     {
-        $request->validate([
-            'document_verifications' => 'nullable|array',
-            'document_verifications.*.document_type' => 'required|string|in:invoice,additional_document',
-            'document_verifications.*.document_id' => 'required|integer'
-        ]);
-
         try {
-            $distribution = $this->distributionService->verifySender($id, $request->document_verifications ?? []);
+            $validatedData = $request->validated();
+            $distribution = $this->distributionService->verifySender($id, $validatedData['document_verifications'] ?? []);
 
             return response()->json([
                 'success' => true,
@@ -375,16 +324,11 @@ class DistributionController extends Controller
     /**
      * Verify distribution by receiver
      */
-    public function verifyReceiver(Request $request, int $id): JsonResponse
+    public function verifyReceiver(VerifyDistributionRequest $request, int $id): JsonResponse
     {
-        $request->validate([
-            'document_verifications' => 'nullable|array',
-            'document_verifications.*.document_type' => 'required|string|in:invoice,additional_document',
-            'document_verifications.*.document_id' => 'required|integer'
-        ]);
-
         try {
-            $distribution = $this->distributionService->verifyReceiver($id, $request->document_verifications ?? []);
+            $validatedData = $request->validated();
+            $distribution = $this->distributionService->verifyReceiver($id, $validatedData['document_verifications'] ?? []);
 
             return response()->json([
                 'success' => true,

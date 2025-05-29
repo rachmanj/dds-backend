@@ -14,7 +14,8 @@ class DistributionHistory extends Model
         'action',
         'user_id',
         'notes',
-        'metadata'
+        'metadata',
+        'created_at'
     ];
 
     protected $casts = [
