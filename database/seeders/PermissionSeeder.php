@@ -56,6 +56,7 @@ class PermissionSeeder extends Seeder
             'documents.create',
             'documents.edit',
             'documents.delete',
+            'documents.import',
             'document.edit-cur_loc',
 
             // Distribution Management
@@ -142,6 +143,7 @@ class PermissionSeeder extends Seeder
             'documents.list',
             'documents.create',
             'documents.edit',
+            'documents.import',
             'document.edit-cur_loc',
             'distribution.view',
             'distribution.manage',

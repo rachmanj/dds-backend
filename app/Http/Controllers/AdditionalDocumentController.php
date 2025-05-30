@@ -6,10 +6,13 @@ use App\Services\AdditionalDocumentService;
 use App\Http\Resources\AdditionalDocumentResource;
 use App\Http\Resources\InvoiceResource;
 use App\Http\Requests\AdditionalDocumentRequest;
+use App\Http\Requests\ImportAdditionalDocumentRequest;
 use App\Models\AdditionalDocument;
+use App\Imports\ItoImport;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AdditionalDocumentController extends Controller
 {
@@ -286,6 +289,45 @@ class AdditionalDocumentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve additional documents for distribution',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Import ITO additional documents from Excel file
+     */
+    public function import(ImportAdditionalDocumentRequest $request): JsonResponse
+    {
+        try {
+            $file = $request->file('file');
+            $checkDuplicates = $request->boolean('check_duplicates', false);
+
+            // Create import instance
+            $import = new ItoImport($checkDuplicates);
+
+            // Process the import
+            Excel::import($import, $file);
+
+            // Get import results
+            $successCount = $import->getSuccessCount();
+            $skippedCount = $import->getSkippedCount();
+            $errors = $import->getErrors();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Import completed successfully',
+                'data' => [
+                    'imported' => $successCount,
+                    'skipped' => $skippedCount,
+                    'total_processed' => $successCount + $skippedCount,
+                    'errors' => $errors
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Import failed: ' . $e->getMessage(),
                 'error' => $e->getMessage()
             ], 500);
         }

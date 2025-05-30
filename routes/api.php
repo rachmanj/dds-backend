@@ -64,6 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('suppliers', SupplierController::class);
     Route::apiResource('invoices', InvoiceController::class);
     Route::apiResource('additional-documents', AdditionalDocumentController::class);
+    Route::post('additional-documents/import', [AdditionalDocumentController::class, 'import']);
 
     // Distribution Management
     Route::apiResource('distribution-types', DistributionTypeController::class);
