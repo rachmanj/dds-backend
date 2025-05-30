@@ -36,6 +36,7 @@ class InvoiceResource extends JsonResource
                 ];
             }),
             'additional_documents' => AdditionalDocumentResource::collection($this->whenLoaded('additionalDocuments')),
+            'attachments' => InvoiceAttachmentResource::collection($this->whenLoaded('attachments')),
             'duration1' => $this->duration1,
             'duration2' => $this->duration2,
             'sap_doc' => $this->sap_doc,

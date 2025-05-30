@@ -49,7 +49,7 @@ class InvoiceController extends Controller
                 ], 400);
             }
 
-            $query = Invoice::with(['supplier', 'type', 'creator'])
+            $query = Invoice::with(['supplier', 'type', 'creator', 'attachments.uploader'])
                 ->where('cur_loc', $userDepartment->location_code);
 
             // Apply filters
@@ -129,7 +129,7 @@ class InvoiceController extends Controller
             $user = Auth::user();
             $userDepartment = $user->department;
 
-            $invoice = Invoice::with(['supplier', 'type', 'creator', 'additionalDocuments'])
+            $invoice = Invoice::with(['supplier', 'type', 'creator', 'additionalDocuments', 'attachments.uploader'])
                 ->where('id', $id)
                 ->where('cur_loc', $userDepartment->location_code)
                 ->first();
@@ -297,7 +297,7 @@ class InvoiceController extends Controller
                 ], 400);
             }
 
-            $query = Invoice::with(['supplier', 'type', 'additionalDocuments'])
+            $query = Invoice::with(['supplier', 'type', 'additionalDocuments', 'attachments.uploader'])
                 ->where('cur_loc', $userDepartment->location_code)
                 ->where('status', '!=', 'cancelled'); // Exclude cancelled invoices
 

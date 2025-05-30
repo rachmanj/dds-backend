@@ -9,7 +9,7 @@ class InvoiceRepository
     public function getAll(array $fields = ['*'], int $perPage = 15)
     {
         return Invoice::select($fields)
-            ->with(['supplier', 'type', 'creator', 'additionalDocuments'])
+            ->with(['supplier', 'type', 'creator', 'additionalDocuments', 'attachments.uploader'])
             ->latest()
             ->paginate($perPage);
     }
@@ -17,21 +17,21 @@ class InvoiceRepository
     public function getById(int $id, array $fields = ['*'])
     {
         return Invoice::select($fields)
-            ->with(['supplier', 'type', 'creator', 'additionalDocuments'])
+            ->with(['supplier', 'type', 'creator', 'additionalDocuments', 'attachments.uploader'])
             ->find($id);
     }
 
     public function create(array $data)
     {
         $invoice = Invoice::create($data);
-        return $invoice->load(['supplier', 'type', 'creator', 'additionalDocuments']);
+        return $invoice->load(['supplier', 'type', 'creator', 'additionalDocuments', 'attachments.uploader']);
     }
 
     public function update(int $id, array $data)
     {
         $invoice = Invoice::findOrFail($id);
         $invoice->update($data);
-        return $invoice->load(['supplier', 'type', 'creator', 'additionalDocuments']);
+        return $invoice->load(['supplier', 'type', 'creator', 'additionalDocuments', 'attachments.uploader']);
     }
 
     public function delete(int $id)

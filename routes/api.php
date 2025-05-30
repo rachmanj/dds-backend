@@ -14,6 +14,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\AdditionalDocumentController;
 use App\Http\Controllers\DistributionTypeController;
 use App\Http\Controllers\DistributionController;
+use App\Http\Controllers\InvoiceAttachmentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -123,4 +124,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/additional-documents/{id}/invoices', [AdditionalDocumentController::class, 'attachInvoice']);
     Route::delete('/additional-documents/{id}/invoices/{invoiceId}', [AdditionalDocumentController::class, 'detachInvoice']);
     Route::put('/additional-documents/{id}/invoices', [AdditionalDocumentController::class, 'syncInvoices']);
+
+    // Invoice Attachment routes
+    Route::get('/invoices/{invoiceId}/attachments', [InvoiceAttachmentController::class, 'index']);
+    Route::post('/invoices/{invoiceId}/attachments', [InvoiceAttachmentController::class, 'store']);
+    Route::get('/invoices/{invoiceId}/attachments/search', [InvoiceAttachmentController::class, 'search']);
+    Route::get('/invoices/{invoiceId}/attachments/type/{type}', [InvoiceAttachmentController::class, 'byType']);
+    Route::get('/invoices/{invoiceId}/attachments/{attachmentId}', [InvoiceAttachmentController::class, 'show']);
+    Route::get('/invoices/{invoiceId}/attachments/{attachmentId}/download', [InvoiceAttachmentController::class, 'download']);
+    Route::get('/invoices/{invoiceId}/attachments/{attachmentId}/info', [InvoiceAttachmentController::class, 'info']);
+    Route::put('/invoices/{invoiceId}/attachments/{attachmentId}', [InvoiceAttachmentController::class, 'update']);
+    Route::delete('/invoices/{invoiceId}/attachments/{attachmentId}', [InvoiceAttachmentController::class, 'destroy']);
+    Route::get('/invoices/{invoiceId}/attachments-stats', [InvoiceAttachmentController::class, 'stats']);
 });
