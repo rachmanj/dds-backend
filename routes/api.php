@@ -15,6 +15,7 @@ use App\Http\Controllers\AdditionalDocumentController;
 use App\Http\Controllers\DistributionTypeController;
 use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\InvoiceAttachmentController;
+use App\Http\Controllers\ReportsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -136,4 +137,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/invoices/{invoiceId}/attachments/{attachmentId}', [InvoiceAttachmentController::class, 'update']);
     Route::delete('/invoices/{invoiceId}/attachments/{attachmentId}', [InvoiceAttachmentController::class, 'destroy']);
     Route::get('/invoices/{invoiceId}/attachments-stats', [InvoiceAttachmentController::class, 'stats']);
+
+    // Reports routes - Read-only comprehensive reporting
+    Route::prefix('reports')->group(function () {
+        // Invoice Reports
+        Route::get('/invoices', [ReportsController::class, 'invoicesReport']);
+        Route::get('/invoices/{id}', [ReportsController::class, 'invoiceDetails']);
+
+        // Additional Documents Reports
+        Route::get('/additional-documents', [ReportsController::class, 'additionalDocumentsReport']);
+        Route::get('/additional-documents/{id}', [ReportsController::class, 'additionalDocumentDetails']);
+
+        // Distribution Reports
+        Route::get('/distributions', [ReportsController::class, 'distributionsReport']);
+        Route::get('/distributions/{id}', [ReportsController::class, 'distributionDetails']);
+    });
 });

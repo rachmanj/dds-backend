@@ -150,6 +150,10 @@ class PermissionSeeder extends Seeder
             'suppliers.view',
             'projects.view',
             'departments.view',
+            'reports.view',
+            'reports.invoices.view',
+            'reports.documents.view',
+            'reports.distributions.view',
         ];
         $managerRole->givePermissionTo($managerPermissions);
 
