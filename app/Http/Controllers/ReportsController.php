@@ -2,49 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Invoice;
-use App\Models\AdditionalDocument;
-use App\Models\Distribution;
+use App\Services\ReportsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class ReportsController extends Controller
 {
+    protected ReportsService $reportsService;
+
+    public function __construct(ReportsService $reportsService)
+    {
+        $this->reportsService = $reportsService;
+    }
+
     /**
      * Get comprehensive invoices report with basic relationships
      */
     public function invoicesReport(Request $request): JsonResponse
     {
         try {
-            $query = Invoice::with(['supplier', 'type', 'creator']);
+            $filters = $request->only([
+                'search',
+                'date_from',
+                'date_to',
+                'status',
+                'supplier_id',
+                'type_id',
+                'created_by',
+                'per_page'
+            ]);
 
-            // Apply search filters
-            if ($request->has('search')) {
-                $search = $request->input('search');
-                $query->where(function ($q) use ($search) {
-                    $q->where('invoice_number', 'like', "%{$search}%")
-                        ->orWhere('faktur_no', 'like', "%{$search}%")
-                        ->orWhere('po_no', 'like', "%{$search}%");
-                });
-            }
-
-            // Apply date filters
-            if ($request->has('date_from')) {
-                $query->whereDate('invoice_date', '>=', $request->input('date_from'));
-            }
-
-            if ($request->has('date_to')) {
-                $query->whereDate('invoice_date', '<=', $request->input('date_to'));
-            }
-
-            // Apply status filter
-            if ($request->has('status')) {
-                $query->where('status', $request->input('status'));
-            }
-
-            $perPage = $request->input('per_page', 15);
-            $invoices = $query->latest('invoice_date')->paginate($perPage);
+            $invoices = $this->reportsService->getInvoicesReport($filters);
 
             return response()->json([
                 'success' => true,
@@ -66,7 +54,7 @@ class ReportsController extends Controller
     public function invoiceDetails(int $id): JsonResponse
     {
         try {
-            $invoice = Invoice::with(['supplier', 'type', 'creator'])->find($id);
+            $invoice = $this->reportsService->getInvoiceDetails($id);
 
             if (!$invoice) {
                 return response()->json([
@@ -95,19 +83,16 @@ class ReportsController extends Controller
     public function additionalDocumentsReport(Request $request): JsonResponse
     {
         try {
-            $query = AdditionalDocument::with(['type', 'creator']);
+            $filters = $request->only([
+                'search',
+                'date_from',
+                'date_to',
+                'type_id',
+                'created_by',
+                'per_page'
+            ]);
 
-            // Apply search filters
-            if ($request->has('search')) {
-                $search = $request->input('search');
-                $query->where(function ($q) use ($search) {
-                    $q->where('document_number', 'like', "%{$search}%")
-                        ->orWhere('po_no', 'like', "%{$search}%");
-                });
-            }
-
-            $perPage = $request->input('per_page', 15);
-            $documents = $query->latest('created_at')->paginate($perPage);
+            $documents = $this->reportsService->getAdditionalDocumentsReport($filters);
 
             return response()->json([
                 'success' => true,
@@ -129,7 +114,7 @@ class ReportsController extends Controller
     public function additionalDocumentDetails(int $id): JsonResponse
     {
         try {
-            $document = AdditionalDocument::with(['type', 'creator', 'invoices'])->find($id);
+            $document = $this->reportsService->getAdditionalDocumentDetails($id);
 
             if (!$document) {
                 return response()->json([
@@ -158,16 +143,22 @@ class ReportsController extends Controller
     public function distributionsReport(Request $request): JsonResponse
     {
         try {
-            $query = Distribution::with(['type', 'creator', 'originDepartment', 'destinationDepartment']);
+            $filters = $request->only([
+                'search',
+                'date_from',
+                'date_to',
+                'status',
+                'type_id',
+                'origin_department_id',
+                'destination_department_id',
+                'created_by',
+                'per_page'
+            ]);
 
-            // Apply search filters
-            if ($request->has('search')) {
-                $search = $request->input('search');
-                $query->where('distribution_number', 'like', "%{$search}%");
-            }
+            $distributions = $this->reportsService->getDistributionsReport($filters);
 
-            $perPage = $request->input('per_page', 15);
-            $distributions = $query->latest('created_at')->paginate($perPage);
+            // Enhance distributions with summary data
+            $distributions = $this->reportsService->enhanceDistributionsCollection($distributions);
 
             return response()->json([
                 'success' => true,
@@ -189,14 +180,7 @@ class ReportsController extends Controller
     public function distributionDetails(int $id): JsonResponse
     {
         try {
-            $distribution = Distribution::with([
-                'type',
-                'creator',
-                'originDepartment',
-                'destinationDepartment',
-                'invoices',
-                'additionalDocuments'
-            ])->find($id);
+            $distribution = $this->reportsService->getDistributionDetails($id);
 
             if (!$distribution) {
                 return response()->json([
@@ -204,6 +188,9 @@ class ReportsController extends Controller
                     'message' => 'Distribution not found'
                 ], 404);
             }
+
+            // Enhance distribution with summary data
+            $distribution = $this->reportsService->enhanceDistributionData($distribution);
 
             return response()->json([
                 'success' => true,
