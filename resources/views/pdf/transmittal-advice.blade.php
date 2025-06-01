@@ -2,285 +2,184 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Transmittal Advice - {{ $distribution->distribution_number }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            line-height: 1.4;
-            margin: 0;
-            padding: 20px;
-        }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 15px;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .header h2 {
-            margin: 5px 0 0 0;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .distribution-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .info-section {
-            width: 48%;
-        }
-
-        .info-section h3 {
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 5px;
-        }
-
-        .info-row {
-            margin-bottom: 5px;
-        }
-
-        .info-label {
-            font-weight: bold;
-            display: inline-block;
-            width: 120px;
-        }
-
-        .documents-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-
-        .documents-table th,
-        .documents-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        .documents-table th {
-            background-color: #f5f5f5;
-            font-weight: bold;
-        }
-
-        .documents-table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        .footer {
-            margin-top: 30px;
-            border-top: 1px solid #ccc;
-            padding-top: 15px;
-        }
-
-        .signature-section {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 40px;
-        }
-
-        .signature-box {
-            width: 45%;
-            text-align: center;
-        }
-
-        .signature-line {
-            border-bottom: 1px solid #333;
-            margin: 40px 0 10px 0;
-            height: 1px;
-        }
-
-        .qr-code {
-            float: right;
-            margin-left: 20px;
-        }
-
-        .type-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: bold;
-            color: white;
-        }
-
-        .type-normal {
-            background-color: #28a745;
-        }
-
-        .type-urgent {
-            background-color: #dc3545;
-        }
-
-        .type-confidential {
-            background-color: #6f42c1;
-        }
-
-        @media print {
-            body {
-                margin: 0;
-            }
-
-            .no-print {
-                display: none;
-            }
-        }
-    </style>
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
 </head>
 
 <body>
-    <div class="header">
-        <h1>TRANSMITTAL ADVICE</h1>
-        <h2>Surat Pengantar Dokumen</h2>
-    </div>
-
-    <div class="distribution-info">
-        <div class="info-section">
-            <h3>Distribution Information</h3>
-            <div class="info-row">
-                <span class="info-label">Number:</span>
-                <strong>{{ $distribution->distribution_number }}</strong>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Date:</span>
-                {{ $distribution->created_at->format('d F Y') }}
-            </div>
-            <div class="info-row">
-                <span class="info-label">Type:</span>
-                <span class="type-badge type-{{ strtolower($distribution->type->code) }}">
-                    {{ $distribution->type->name }}
-                </span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Status:</span>
-                {{ ucfirst(str_replace('_', ' ', $distribution->status)) }}
-            </div>
-        </div>
-
-        <div class="info-section">
-            <h3>Routing Information</h3>
-            <div class="info-row">
-                <span class="info-label">From:</span>
-                {{ $distribution->originDepartment->name }}
-                ({{ $distribution->originDepartment->location_code }})
-            </div>
-            <div class="info-row">
-                <span class="info-label">To:</span>
-                {{ $distribution->destinationDepartment->name }}
-                ({{ $distribution->destinationDepartment->location_code }})
-            </div>
-            <div class="info-row">
-                <span class="info-label">Created by:</span>
-                {{ $distribution->creator->name }}
-            </div>
-            @if ($distribution->notes)
-                <div class="info-row">
-                    <span class="info-label">Notes:</span>
-                    {{ $distribution->notes }}
+    <div class="wrapper">
+        <!-- Main content -->
+        <section class="invoice">
+            <!-- title row -->
+            <div class="row">
+                <div class="col-12">
+                    <table class="table">
+                        <tr>
+                            <td rowspan="2">
+                                <h4>PT Arkananta Apta Pratista</h4>
+                            </td>
+                            <td rowspan="2">
+                                <h3><b>Transmittal Advice</b></h3>
+                                <h4>Surat Pengantar Dokumen</h4>
+                                <h4>Nomor: {{ $distribution->distribution_number }}</h4>
+                            </td>
+                            <td class="text-">ARKA/DDS/{{ date('m/Y', strtotime($distribution->created_at)) }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ $distribution->created_at->format('d-M-Y') }}</td>
+                        </tr>
+                    </table>
                 </div>
-            @endif
-        </div>
-    </div>
-
-    <h3>Attached Documents</h3>
-    <table class="documents-table">
-        <thead>
-            <tr>
-                <th>No.</th>
-                <th>Document Type</th>
-                <th>Document Number</th>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Amount</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($documents as $index => $document)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $document['type'] }}</td>
-                    <td>{{ $document['number'] }}</td>
-                    <td>{{ $document['date'] }}</td>
-                    <td>{{ $document['description'] }}</td>
-                    <td>
-                        @if ($document['amount'])
-                            {{ $document['currency'] }} {{ number_format($document['amount'], 2) }}
-                        @else
-                            -
-                        @endif
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="6" style="text-align: center; color: #666;">No documents attached</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    <div class="footer">
-        <div style="margin-bottom: 20px;">
-            <strong>Total Documents:</strong> {{ count($documents) }}
-        </div>
-
-        @if (!isset($preview_mode) || !$preview_mode)
-            <div class="qr-code">
-                <!-- QR Code would be generated here -->
-                <div
-                    style="width: 80px; height: 80px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 10px;">
-                    QR Code
+                <!-- /.col -->
+            </div>
+            <!-- info row -->
+            <div class="row">
+                <div class="col-5">
+                    Kepada
+                    <address>
+                        <strong>{{ $distribution->destinationDepartment->name }}</strong> <br>
+                        <strong>{{ $distribution->destinationDepartment->location_code }}</strong><br>
+                        {{ $distribution->destinationDepartment->name }}
+                    </address>
+                </div>
+                <div class="col-6">
+                    <p>
+                    <h5>Date: {{ $distribution->created_at->format('d-M-Y') }}</h5>
+                    </p>
+                    <p>Type:
+                        <span
+                            class="badge badge-{{ strtolower($distribution->type->code) == 'normal' ? 'success' : (strtolower($distribution->type->code) == 'urgent' ? 'danger' : 'primary') }}">
+                            {{ $distribution->type->name }}
+                        </span>
+                    </p>
+                    <p>Status: {{ ucfirst(str_replace('_', ' ', $distribution->status)) }}</p>
+                    <p>From: {{ $distribution->originDepartment->name }}
+                        ({{ $distribution->originDepartment->location_code }})</p>
+                    <p>Created by: {{ $distribution->creator->name }}</p>
+                    @if ($distribution->notes)
+                        <p>Notes: {{ $distribution->notes }}</p>
+                    @endif
                 </div>
             </div>
-        @endif
+            <!-- /.row -->
 
-        <div class="signature-section">
-            <div class="signature-box">
-                <div><strong>Sender</strong></div>
-                <div class="signature-line"></div>
-                <div>{{ $distribution->creator->name }}</div>
-                <div>{{ $distribution->originDepartment->name }}</div>
-                @if ($distribution->sender_verified_at)
-                    <div style="font-size: 10px; color: #666;">
-                        Verified: {{ $distribution->sender_verified_at->format('d/m/Y H:i') }}
-                    </div>
-                @endif
+            <!-- Table row -->
+            <div class="row">
+                <div class="col-12 table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>NO</th>
+                                <th>DOCUMENT TYPE</th>
+                                <th>DOCUMENT NUMBER</th>
+                                <th>DATE</th>
+                                <th>DESCRIPTION</th>
+                                <th class="text-center">AMOUNT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($documents as $index => $document)
+                                <tr>
+                                    <th>{{ $index + 1 }}</th>
+                                    <th>{{ $document['type'] }}</th>
+                                    <th>{{ $document['number'] }}</th>
+                                    <th>{{ $document['date'] }}</th>
+                                    <th>{{ $document['description'] }}</th>
+                                    <th class="text-right">
+                                        @if ($document['amount'])
+                                            {{ $document['currency'] }} {{ number_format($document['amount'], 2) }}
+                                        @else
+                                            -
+                                        @endif
+                                    </th>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center" style="color: #666;">No documents attached
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+
+            <!-- Summary row -->
+            <div class="row">
+                <div class="col-12">
+                    <p><strong>Total Documents:</strong> {{ count($documents) }}</p>
+                    @if ($distribution->sender_verified_at)
+                        <p><strong>Sender Verified:</strong>
+                            {{ $distribution->sender_verified_at->format('d/m/Y H:i') }}</p>
+                    @endif
+                    @if ($distribution->receiver_verified_at)
+                        <p><strong>Receiver Verified:</strong>
+                            {{ $distribution->receiver_verified_at->format('d/m/Y H:i') }}</p>
+                    @endif
+                </div>
             </div>
 
-            <div class="signature-box">
-                <div><strong>Receiver</strong></div>
-                <div class="signature-line"></div>
-                <div>_____________________</div>
-                <div>{{ $distribution->destinationDepartment->name }}</div>
-                @if ($distribution->receiver_verified_at)
-                    <div style="font-size: 10px; color: #666;">
-                        Verified: {{ $distribution->receiver_verified_at->format('d/m/Y H:i') }}
-                    </div>
-                @endif
+            <!-- Signature row -->
+            <div class="row">
+                <div class="col-12">
+                    <table class="table">
+                        <tr>
+                            <th>Sender</th>
+                            <th>Acknowledge</th>
+                            <th>Receiver</th>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>({{ $distribution->creator->name }})</td>
+                            <td>(____________________________________)</td>
+                            <td>(____________________________________)</td>
+                        </tr>
+                        <tr>
+                            <td>{{ $distribution->originDepartment->name }}</td>
+                            <td></td>
+                            <td>{{ $distribution->destinationDepartment->name }}</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <div style="text-align: center; margin-top: 30px; font-size: 10px; color: #666;">
-            Generated on {{ $generated_at->format('d F Y \a\t H:i:s') }}
-            @if (isset($generated_by))
-                by {{ $generated_by->name }}
-            @endif
-        </div>
+            <!-- Footer -->
+            <div class="row">
+                <div class="col-12 text-center" style="font-size: 10px; color: #666; margin-top: 20px;">
+                    Generated on {{ $generated_at->format('d F Y \a\t H:i:s') }}
+                    @if (isset($generated_by))
+                        by {{ $generated_by->name }}
+                    @endif
+                </div>
+            </div>
+        </section>
+        <!-- /.content -->
     </div>
+    <!-- ./wrapper -->
+    <!-- Page specific script -->
+    <script>
+        window.addEventListener("load", window.print());
+    </script>
 </body>
 
 </html>

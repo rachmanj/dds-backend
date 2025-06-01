@@ -26,13 +26,22 @@ class ReportsRepository
             });
         }
 
-        // Apply date filters
+        // Apply invoice date filters
         if (!empty($filters['date_from'])) {
             $query->whereDate('invoice_date', '>=', $filters['date_from']);
         }
 
         if (!empty($filters['date_to'])) {
             $query->whereDate('invoice_date', '<=', $filters['date_to']);
+        }
+
+        // Apply receive date filters
+        if (!empty($filters['receive_date_from'])) {
+            $query->whereDate('receive_date', '>=', $filters['receive_date_from']);
+        }
+
+        if (!empty($filters['receive_date_to'])) {
+            $query->whereDate('receive_date', '<=', $filters['receive_date_to']);
         }
 
         // Apply status filter

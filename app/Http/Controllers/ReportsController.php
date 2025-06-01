@@ -25,6 +25,8 @@ class ReportsController extends Controller
                 'search',
                 'date_from',
                 'date_to',
+                'receive_date_from',
+                'receive_date_to',
                 'status',
                 'supplier_id',
                 'type_id',
