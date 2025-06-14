@@ -85,6 +85,10 @@ class PermissionSeeder extends Seeder
             'departments.create',
             'departments.edit',
             'departments.delete',
+            'reports.view',
+            'reports.invoices.view',
+            'reports.documents.view',
+            'reports.distributions.view',
 
             // Admin Access
             'admin.access',

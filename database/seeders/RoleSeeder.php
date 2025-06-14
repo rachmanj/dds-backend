@@ -5,13 +5,13 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class RolePermissionSeeder extends Seeder
+class RoleSeeder extends Seeder
 {
     public function run(): void
     {
         $roles = [
             ['name' => 'admin', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'superadmin', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'super-admin', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'user', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'accounting', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'finance', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],

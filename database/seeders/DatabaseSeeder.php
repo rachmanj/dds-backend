@@ -43,10 +43,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             DepartmentsTableSeeder::class,
             ProjectsTableSeeder::class,
-            // InvoiceTypeSeeder::class,
-            // AddocTypeSeeder::class,
-            // RolePermissionSeeder::class,
-            UserSeeder::class, // Add our test user
+            InvoiceTypeSeeder::class,
+            AddocTypeSeeder::class,
+            RoleSeeder::class,
+            PermissionSeeder::class,
             DistributionTypeSeeder::class,
         ]);
 
