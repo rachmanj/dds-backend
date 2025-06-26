@@ -177,15 +177,29 @@ class InvoiceController extends Controller
 
     public function destroy(int $id)
     {
-        $deleted = $this->invoiceService->delete($id);
+        $this->invoiceService->delete($id);
+        return response()->json(null, 204);
+    }
 
-        if (!$deleted) {
+    /**
+     * Get additional documents for an invoice
+     */
+    public function getAdditionalDocuments(int $id)
+    {
+        $invoice = $this->invoiceService->getById($id);
+
+        if (!$invoice) {
             return response()->json([
                 'message' => 'Invoice not found'
             ], 404);
         }
 
-        return response()->json(null, 204);
+        // Load additional documents with their type and other relationships
+        $additionalDocuments = $invoice->additionalDocuments()
+            ->with(['type', 'creator', 'invoices.supplier'])
+            ->get();
+
+        return AdditionalDocumentResource::collection($additionalDocuments);
     }
 
     public function validateInvoiceNumber(Request $request)
@@ -206,19 +220,6 @@ class InvoiceController extends Controller
             'valid' => $isValid,
             'message' => $isValid ? 'Invoice number is available' : 'This invoice number already exists for the selected supplier'
         ]);
-    }
-
-    public function getAdditionalDocuments(int $id)
-    {
-        $invoice = $this->invoiceService->getById($id);
-
-        if (!$invoice) {
-            return response()->json([
-                'message' => 'Invoice not found'
-            ], 404);
-        }
-
-        return AdditionalDocumentResource::collection($invoice->additionalDocuments);
     }
 
     public function attachAdditionalDocument(int $id, Request $request)

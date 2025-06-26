@@ -36,4 +36,21 @@ class Department extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    /**
+     * Get document locations for this department
+     */
+    public function documentLocations(): HasMany
+    {
+        return $this->hasMany(DocumentLocation::class, 'location_code', 'location_code');
+    }
+
+    /**
+     * Get documents currently at this location
+     */
+    public function documentsAtLocation()
+    {
+        return $this->documentLocations()
+            ->whereRaw('moved_at = (SELECT MAX(moved_at) FROM document_locations dl2 WHERE dl2.document_type = document_locations.document_type AND dl2.document_id = document_locations.document_id)');
+    }
 }

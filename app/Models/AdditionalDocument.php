@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use App\Services\DocumentTrackingService;
 
 class AdditionalDocument extends Model
 {
@@ -55,5 +56,39 @@ class AdditionalDocument extends Model
         return $this->morphToMany(Distribution::class, 'document', 'distribution_documents')
             ->withPivot(['sender_verified', 'receiver_verified'])
             ->withTimestamps();
+    }
+
+    /**
+     * Get location history for this additional document
+     */
+    public function locationHistory()
+    {
+        return $this->hasMany(DocumentLocation::class, 'document_id')
+            ->where('document_type', 'additional_document')
+            ->orderBy('moved_at', 'desc');
+    }
+
+    /**
+     * Get tracking events for this additional document
+     */
+    public function trackingEvents()
+    {
+        return $this->morphMany(TrackingEvent::class, 'trackable');
+    }
+
+    /**
+     * Get current location code
+     */
+    public function getCurrentLocationAttribute(): ?string
+    {
+        return DocumentLocation::getCurrentLocation('additional_document', $this->id) ?? $this->cur_loc;
+    }
+
+    /**
+     * Get location timeline with both locations and events
+     */
+    public function getLocationTimeline()
+    {
+        return app(DocumentTrackingService::class)->getLocationTimeline('additional_document', $this->id);
     }
 }

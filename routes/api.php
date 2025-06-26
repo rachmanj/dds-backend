@@ -16,6 +16,11 @@ use App\Http\Controllers\DistributionTypeController;
 use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\InvoiceAttachmentController;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\DocumentTrackingController;
+use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\FileManagementController;
+use App\Http\Controllers\UserPreferencesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -138,6 +143,31 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/invoices/{invoiceId}/attachments/{attachmentId}', [InvoiceAttachmentController::class, 'destroy']);
     Route::get('/invoices/{invoiceId}/attachments-stats', [InvoiceAttachmentController::class, 'stats']);
 
+    // Notification routes - Phase 1 Real-time Notifications
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead']);
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+        Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::get('/types', [NotificationController::class, 'getTypes']);
+        Route::delete('/{id}', [NotificationController::class, 'destroy']);
+        Route::post('/bulk-action', [NotificationController::class, 'bulkAction']);
+        Route::post('/test', [NotificationController::class, 'test']);
+    });
+
+    // Document Tracking routes - Phase 2 Enhanced Document Tracking
+    Route::prefix('tracking')->group(function () {
+        Route::get('/{documentType}/{documentId}/history', [DocumentTrackingController::class, 'getHistory']);
+        Route::get('/{documentType}/{documentId}/timeline', [DocumentTrackingController::class, 'getTimeline']);
+        Route::get('/{documentType}/{documentId}/location', [DocumentTrackingController::class, 'getCurrentLocation']);
+        Route::get('/location/{locationCode}/documents', [DocumentTrackingController::class, 'getLocationDocuments']);
+        Route::post('/move', [DocumentTrackingController::class, 'trackMovement']);
+        Route::get('/statistics', [DocumentTrackingController::class, 'getStatistics']);
+        Route::get('/departments/summary', [DocumentTrackingController::class, 'getDepartmentSummary']);
+        Route::get('/search', [DocumentTrackingController::class, 'search']);
+        Route::post('/initialize', [DocumentTrackingController::class, 'initializeTracking']);
+    });
+
     // Reports routes - Read-only comprehensive reporting
     Route::prefix('reports')->group(function () {
         // Invoice Reports
@@ -151,5 +181,57 @@ Route::middleware('auth:sanctum')->group(function () {
         // Distribution Reports
         Route::get('/distributions', [ReportsController::class, 'distributionsReport']);
         Route::get('/distributions/{id}', [ReportsController::class, 'distributionDetails']);
+    });
+
+    // Analytics routes - Phase 3 Analytics Dashboard
+    Route::prefix('analytics')->group(function () {
+        Route::get('/dashboard', [AnalyticsController::class, 'dashboard']);
+        Route::get('/performance', [AnalyticsController::class, 'performance']);
+        Route::get('/departments/{departmentId}/metrics', [AnalyticsController::class, 'departmentMetrics']);
+        Route::get('/users/{userId}/activity', [AnalyticsController::class, 'userActivity']);
+        Route::get('/weekly', [AnalyticsController::class, 'weeklyAnalytics']);
+        Route::get('/realtime', [AnalyticsController::class, 'realtime']);
+        Route::get('/workflow-metrics', [AnalyticsController::class, 'workflowMetrics']);
+        Route::get('/usage-patterns', [AnalyticsController::class, 'usagePatterns']);
+        Route::get('/performance-comparison', [AnalyticsController::class, 'performanceComparison']);
+        Route::get('/system-health', [AnalyticsController::class, 'systemHealth']);
+        Route::get('/performance-alerts', [AnalyticsController::class, 'performanceAlerts']);
+        Route::post('/export-report', [AnalyticsController::class, 'exportReport']);
+
+        // Admin-only routes
+        Route::middleware('role:super-admin')->group(function () {
+            Route::post('/collect', [AnalyticsController::class, 'collectAnalytics']);
+            Route::post('/cleanup', [AnalyticsController::class, 'cleanupOldData']);
+        });
+    });
+
+    // File Management routes - Phase 5 File Management & Watermarking
+    Route::prefix('file-management')->group(function () {
+        // Enhanced file upload and processing
+        Route::post('/invoices/{invoiceId}/upload', [FileManagementController::class, 'upload']);
+        Route::get('/attachments/{attachmentId}/processing-status', [FileManagementController::class, 'getProcessingStatus']);
+        Route::get('/invoices/{invoiceId}/attachments/{attachmentId}/download', [FileManagementController::class, 'download']);
+
+        // Watermarking operations
+        Route::post('/attachments/{attachmentId}/watermark', [FileManagementController::class, 'applyWatermark']);
+        Route::delete('/attachments/{attachmentId}/watermark', [FileManagementController::class, 'removeWatermark']);
+        Route::get('/attachments/{attachmentId}/watermark', [FileManagementController::class, 'getWatermarkDetails']);
+
+        // Processing jobs management
+        Route::get('/processing-jobs', [FileManagementController::class, 'getProcessingJobs']);
+        Route::post('/processing-jobs/{jobId}/retry', [FileManagementController::class, 'retryProcessingJob']);
+
+        // File statistics and management
+        Route::get('/statistics', [FileManagementController::class, 'getFileStatistics']);
+    });
+
+    // User Preferences routes - Phase 6 User Experience Enhancements
+    Route::prefix('preferences')->group(function () {
+        Route::get('/', [UserPreferencesController::class, 'show']);
+        Route::put('/', [UserPreferencesController::class, 'update']);
+        Route::put('/theme', [UserPreferencesController::class, 'updateTheme']);
+        Route::put('/dashboard-layout', [UserPreferencesController::class, 'updateDashboardLayout']);
+        Route::put('/notifications', [UserPreferencesController::class, 'updateNotificationSettings']);
+        Route::post('/reset', [UserPreferencesController::class, 'resetToDefaults']);
     });
 });

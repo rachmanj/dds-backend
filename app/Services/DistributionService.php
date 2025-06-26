@@ -13,18 +13,24 @@ class DistributionService
     protected DistributionRepository $distributionRepository;
     protected DistributionTypeRepository $distributionTypeRepository;
     protected DepartmentRepository $departmentRepository;
-    protected DistributionNotificationService $notificationService;
+    protected DistributionNotificationService $distributionNotificationService;
+    protected NotificationService $notificationService;
+    protected DocumentTrackingService $documentTrackingService;
 
     public function __construct(
         DistributionRepository $distributionRepository,
         DistributionTypeRepository $distributionTypeRepository,
         DepartmentRepository $departmentRepository,
-        DistributionNotificationService $notificationService
+        DistributionNotificationService $distributionNotificationService,
+        NotificationService $notificationService,
+        DocumentTrackingService $documentTrackingService
     ) {
         $this->distributionRepository = $distributionRepository;
         $this->distributionTypeRepository = $distributionTypeRepository;
         $this->departmentRepository = $departmentRepository;
+        $this->distributionNotificationService = $distributionNotificationService;
         $this->notificationService = $notificationService;
+        $this->documentTrackingService = $documentTrackingService;
     }
 
     public function getAll(array $fields = ['*'], int $perPage = 15, array $filters = [])
@@ -96,7 +102,7 @@ class DistributionService
             DB::commit();
 
             // Send notification
-            $this->notificationService->sendCreatedNotification($distribution);
+            $this->notificationService->createDistributionNotification('distribution_created', $distribution);
 
             // Return distribution with warnings
             $distribution->warnings = $processedDocuments['warnings'] ?? [];
@@ -289,7 +295,7 @@ class DistributionService
             DB::commit();
 
             // Send notification
-            $this->notificationService->sendSentNotification($updatedDistribution);
+            $this->notificationService->createDistributionNotification('distribution_sent', $updatedDistribution);
 
             return $updatedDistribution;
         } catch (\Exception $e) {
@@ -317,7 +323,32 @@ class DistributionService
             );
             $newLocationCode = $destinationDepartment->location_code;
 
-            // Update document locations based on distribution type
+            // Get origin location for tracking
+            $originDepartment = $this->departmentRepository->getById(
+                $distribution->origin_department_id,
+                ['location_code']
+            );
+            $fromLocationCode = $originDepartment->location_code;
+
+            // Enhanced document tracking - track each document movement
+            $documentsToTrack = [];
+            foreach ($distribution->documents as $distributionDocument) {
+                $documentsToTrack[] = [
+                    'type' => $distributionDocument->document_type === 'App\Models\Invoice' ? 'invoice' : 'additional_document',
+                    'id' => $distributionDocument->document_id,
+                    'current_location' => $fromLocationCode
+                ];
+            }
+
+            // Track bulk movement with enhanced logging
+            $this->documentTrackingService->trackBulkMovement(
+                $documentsToTrack,
+                $newLocationCode,
+                "Distribution #{$distribution->distribution_number} received",
+                $distributionId
+            );
+
+            // Update document locations based on distribution type (keeping existing logic)
             $this->updateDocumentLocations($distribution, $newLocationCode);
 
             // Update distribution status
@@ -337,7 +368,7 @@ class DistributionService
             DB::commit();
 
             // Send notification
-            $this->notificationService->sendReceivedNotification($updatedDistribution);
+            $this->notificationService->createDistributionNotification('distribution_received', $updatedDistribution);
 
             return $updatedDistribution;
         } catch (\Exception $e) {
@@ -439,7 +470,7 @@ class DistributionService
                 }
 
                 // Send discrepancy notification to sender/origin department
-                $this->notificationService->sendDiscrepancyNotification($updatedDistribution, $discrepancyDetails);
+                $this->notificationService->createDistributionNotification('distribution_discrepancy', $updatedDistribution, 'Discrepancies found during receiver verification');
             }
 
             DB::commit();
@@ -479,7 +510,7 @@ class DistributionService
             DB::commit();
 
             // Send notification
-            $this->notificationService->sendCompletedNotification($updatedDistribution);
+            $this->notificationService->createDistributionNotification('distribution_completed', $updatedDistribution);
 
             return $updatedDistribution;
         } catch (\Exception $e) {

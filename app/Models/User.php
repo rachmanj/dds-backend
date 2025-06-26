@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -84,5 +85,18 @@ class User extends Authenticatable
     public function distributionHistories(): HasMany
     {
         return $this->hasMany(DistributionHistory::class);
+    }
+
+    public function preferences(): HasOne
+    {
+        return $this->hasOne(UserPreferences::class);
+    }
+
+    public function getPreferencesAttribute()
+    {
+        if (!$this->preferences) {
+            return UserPreferences::create(['user_id' => $this->id]);
+        }
+        return $this->preferences;
     }
 }

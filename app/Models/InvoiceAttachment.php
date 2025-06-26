@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
 class InvoiceAttachment extends Model
@@ -30,6 +31,11 @@ class InvoiceAttachment extends Model
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    public function watermark(): HasOne
+    {
+        return $this->hasOne(FileWatermark::class, 'original_file_id');
     }
 
     /**
